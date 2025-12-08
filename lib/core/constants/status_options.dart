@@ -80,13 +80,13 @@ class JobSources {
     'WUZZUF',
     'Glassdoor',
     'Bayt.com',
+    'WhatsApp',
     'Company Website',
     'Referral',
     'Recruiter Outreach',
     'GitHub Jobs',
     'Stack Overflow Jobs',
     'Twitter/X',
-    'WhatsApp',
     'Other',
   ];
 }

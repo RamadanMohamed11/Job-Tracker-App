@@ -35,6 +35,55 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # ============================================
+  # LOCAL DATABASE - Hive
+  # ============================================
+  # Hive is a lightweight, fast NoSQL database for Flutter.
+  # It stores data locally on the device as key-value pairs.
+  # We use it to save job applications so they persist when the app closes.
+  hive: ^2.2.3
+  
+  # hive_flutter provides Flutter-specific utilities for Hive,
+  # like automatic initialization and box management.
+  hive_flutter: ^1.1.0
+
+  # ============================================
+  # STATE MANAGEMENT - Provider
+  # ============================================
+  # Provider is a simple, flexible state management solution.
+  # It allows widgets to listen to changes and rebuild automatically.
+  # We use it to manage the list of jobs, filters, and theme state.
+  provider: ^6.1.2
+
+  # ============================================
+  # UNIQUE ID GENERATION - UUID
+  # ============================================
+  # UUID (Universally Unique Identifier) generates unique IDs.
+  # Each job application needs a unique ID so we can find, edit, or delete it.
+  # Example ID: "550e8400-e29b-41d4-a716-446655440000"
+  uuid: ^4.5.1
+
+  # ============================================
+  # DATE FORMATTING - intl
+  # ============================================
+  # intl provides internationalization and localization utilities.
+  # We use it to format dates nicely (e.g., "Dec 9, 2024" instead of "2024-12-09").
+  intl: ^0.20.1
+
+  # ============================================
+  # SWIPE ACTIONS - flutter_slidable
+  # ============================================
+  # flutter_slidable adds swipe-to-reveal actions on list items.
+  # Users can swipe a job card to quickly edit or delete it.
+  flutter_slidable: ^3.1.1
+
+  # ============================================
+  # FONTS - Google Fonts
+  # ============================================
+  # google_fonts provides access to 1000+ fonts from Google Fonts.
+  # We use the "Inter" font for a clean, modern look (same as the HTML design).
+  google_fonts: ^6.2.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,6 +94,19 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+  # ============================================
+  # HIVE CODE GENERATION
+  # ============================================
+  # hive_generator automatically generates TypeAdapter code for our models.
+  # TypeAdapters tell Hive how to serialize/deserialize our JobApplication class.
+  # This saves us from writing boring boilerplate code manually.
+  hive_generator: ^2.0.1
+
+  # build_runner is the tool that runs code generators like hive_generator.
+  # We run: flutter pub run build_runner build
+  # to generate the .g.dart files.
+  build_runner: ^2.4.13
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
