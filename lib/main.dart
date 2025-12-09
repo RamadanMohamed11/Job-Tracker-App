@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 
 import 'core/theme/theme.dart';
 import 'core/constants/app_strings.dart';
+import 'core/services/notification_service.dart';
 import 'data/local/database_service.dart';
 import 'presentation/cubits/cubits.dart';
 import 'presentation/screens/home/home_screen.dart';
@@ -13,10 +14,11 @@ import 'presentation/screens/home/home_screen.dart';
 // WHAT IS THIS FILE?
 // ============================================
 // main.dart is the entry point of the Flutter application.
-// It does 3 things before showing the UI:
+// It does 4 things before showing the UI:
 // 1. Initialize Hive database
 // 2. Initialize HydratedBloc storage (for persisting theme)
-// 3. Set up Bloc providers (makes Cubits available to the widget tree)
+// 3. Initialize Notification Service (for follow-up reminders)
+// 4. Set up Bloc providers (makes Cubits available to the widget tree)
 
 void main() async {
   // ============================================
@@ -41,7 +43,13 @@ void main() async {
   );
 
   // ============================================
-  // STEP 4: Run the App
+  // STEP 4: Initialize Notification Service
+  // ============================================
+  // This sets up local notifications for follow-up reminders.
+  await NotificationService().initialize();
+
+  // ============================================
+  // STEP 5: Run the App
   // ============================================
   runApp(const JobTrackerApp());
 }

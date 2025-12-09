@@ -98,6 +98,20 @@ dependencies:
   # We use the "Inter" font for a clean, modern look (same as the HTML design).
   google_fonts: ^6.2.1
 
+  # ============================================
+  # LOCAL NOTIFICATIONS - flutter_local_notifications
+  # ============================================
+  # flutter_local_notifications allows scheduling and displaying local notifications.
+  # We use it to remind users about follow-up dates for job applications.
+  flutter_local_notifications: ^18.0.1
+
+  # ============================================
+  # TIMEZONE - timezone
+  # ============================================
+  # timezone provides timezone database for scheduling notifications at specific times.
+  # Required for scheduling notifications with flutter_local_notifications.
+  timezone: ^0.9.4
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
