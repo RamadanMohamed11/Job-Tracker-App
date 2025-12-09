@@ -1,122 +1,193 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:hydrated_bloc/hydrated_bloc.dart';
+import 'package:path_provider/path_provider.dart';
 
-void main() {
-  runApp(const MyApp());
+import 'core/theme/theme.dart';
+import 'core/constants/app_strings.dart';
+import 'data/local/database_service.dart';
+import 'presentation/cubits/cubits.dart';
+
+// ============================================
+// WHAT IS THIS FILE?
+// ============================================
+// main.dart is the entry point of the Flutter application.
+// It does 3 things before showing the UI:
+// 1. Initialize Hive database
+// 2. Initialize HydratedBloc storage (for persisting theme)
+// 3. Set up Bloc providers (makes Cubits available to the widget tree)
+
+void main() async {
+  // ============================================
+  // STEP 1: Ensure Flutter is initialized
+  // ============================================
+  // This is required before calling any async operations.
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // ============================================
+  // STEP 2: Initialize Hive Database
+  // ============================================
+  // This sets up the local storage for job applications.
+  await DatabaseService.instance.initialize();
+
+  // ============================================
+  // STEP 3: Initialize HydratedBloc Storage
+  // ============================================
+  // HydratedBloc needs a storage location to persist Cubit states.
+  // We use the app's documents directory.
+  HydratedBloc.storage = await HydratedStorage.build(
+    storageDirectory: await getApplicationDocumentsDirectory(),
+  );
+
+  // ============================================
+  // STEP 4: Run the App
+  // ============================================
+  runApp(const JobTrackerApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+// ============================================
+// ROOT WIDGET
+// ============================================
+// JobTrackerApp is the root widget that sets up:
+// - Bloc providers (state management)
+// - Theme (light/dark mode)
+// - Navigation (which screen to show)
+class JobTrackerApp extends StatelessWidget {
+  const JobTrackerApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        // This is the theme of your application.
-        //
-        // TRY THIS: Try running your application with "flutter run". You'll see
-        // the application has a purple toolbar. Then, without quitting the app,
-        // try changing the seedColor in the colorScheme below to Colors.green
-        // and then invoke "hot reload" (save your changes or press the "hot
-        // reload" button in a Flutter-supported IDE, or press "r" if you used
-        // the command line to start the app).
-        //
-        // Notice that the counter didn't reset back to zero; the application
-        // state is not lost during the reload. To reset the state, use hot
-        // restart instead.
-        //
-        // This works for code too, not just values: Most code changes can be
-        // tested with just a hot reload.
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-      ),
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
+    // ============================================
+    // MULTI BLOC PROVIDER
+    // ============================================
+    // MultiBlocProvider wraps the app with multiple Cubits.
+    // Any widget in the tree can access these Cubits using:
+    //   context.read<ThemeCubit>()
+    //   context.watch<JobsCubit>().state
+    return MultiBlocProvider(
+      providers: [
+        // Theme Cubit - manages light/dark mode
+        BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
+        // Jobs Cubit - manages job applications
+        BlocProvider<JobsCubit>(create: (_) => JobsCubit()..loadJobs()),
+      ],
+      child: const _AppWithTheme(),
     );
   }
 }
 
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
-
-  // This widget is the home page of your application. It is stateful, meaning
-  // that it has a State object (defined below) that contains fields that affect
-  // how it looks.
-
-  // This class is the configuration for the state. It holds the values (in this
-  // case the title) provided by the parent (in this case the App widget) and
-  // used by the build method of the State. Fields in a Widget subclass are
-  // always marked "final".
-
-  final String title;
-
-  @override
-  State<MyHomePage> createState() => _MyHomePageState();
-}
-
-class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
-
-  void _incrementCounter() {
-    setState(() {
-      // This call to setState tells the Flutter framework that something has
-      // changed in this State, which causes it to rerun the build method below
-      // so that the display can reflect the updated values. If we changed
-      // _counter without calling setState(), then the build method would not be
-      // called again, and so nothing would appear to happen.
-      _counter++;
-    });
-  }
+// ============================================
+// APP WITH THEME
+// ============================================
+// Separate widget that listens to ThemeCubit and rebuilds
+// when theme changes.
+class _AppWithTheme extends StatelessWidget {
+  const _AppWithTheme();
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
+    // ============================================
+    // BLOC BUILDER
+    // ============================================
+    // BlocBuilder rebuilds this widget when ThemeCubit emits new state.
+    // We use it to update the MaterialApp's themeMode.
+    return BlocBuilder<ThemeCubit, ThemeState>(
+      builder: (context, themeState) {
+        return MaterialApp(
+          // App title (shown in task switcher)
+          title: AppStrings.appName,
+
+          // Disable the debug banner
+          debugShowCheckedModeBanner: false,
+
+          // Light theme configuration
+          theme: AppTheme.lightTheme,
+
+          // Dark theme configuration
+          darkTheme: AppTheme.darkTheme,
+
+          // Which theme to use: light, dark, or system
+          themeMode: themeState.flutterThemeMode,
+
+          // Home screen - we'll create this next!
+          // For now, show a placeholder
+          home: const _PlaceholderHomeScreen(),
+        );
+      },
+    );
+  }
+}
+
+// ============================================
+// PLACEHOLDER HOME SCREEN
+// ============================================
+// Temporary screen until we build the real UI.
+// This lets us test that everything works.
+class _PlaceholderHomeScreen extends StatelessWidget {
+  const _PlaceholderHomeScreen();
+
+  @override
+  Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        // TRY THIS: Try changing the color here to a specific color (to
-        // Colors.amber, perhaps?) and trigger a hot reload to see the AppBar
-        // change color while the other colors stay the same.
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+        title: const Text(AppStrings.appName),
+        actions: [
+          // Theme toggle button
+          IconButton(
+            icon: Icon(
+              Theme.of(context).brightness == Brightness.dark
+                  ? Icons.light_mode
+                  : Icons.dark_mode,
+            ),
+            onPressed: () {
+              // Toggle theme when pressed
+              context.read<ThemeCubit>().toggleTheme();
+            },
+            tooltip: 'Toggle Theme',
+          ),
+        ],
       ),
       body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
         child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
+          children: [
+            Icon(
+              Icons.work_outline,
+              size: 80,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 24),
             Text(
-              '$_counter',
+              AppStrings.appName,
               style: Theme.of(context).textTheme.headlineMedium,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Theme & Bloc setup complete!',
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: 32),
+            // Show current job count from JobsCubit
+            BlocBuilder<JobsCubit, JobsState>(
+              builder: (context, state) {
+                return Text(
+                  'Total Jobs: ${state.totalCount}',
+                  style: Theme.of(context).textTheme.titleMedium,
+                );
+              },
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
+        onPressed: () {
+          // Placeholder - will navigate to add job screen later
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Add Job screen coming soon!')),
+          );
+        },
         child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
+      ),
     );
   }
 }

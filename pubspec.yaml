@@ -48,12 +48,19 @@ dependencies:
   hive_flutter: ^1.1.0
 
   # ============================================
-  # STATE MANAGEMENT - Provider
+  # STATE MANAGEMENT - Flutter Bloc (Cubit)
   # ============================================
-  # Provider is a simple, flexible state management solution.
-  # It allows widgets to listen to changes and rebuild automatically.
+  # flutter_bloc provides Bloc and Cubit classes for state management.
+  # Cubit is a simpler version of Bloc - good for straightforward state changes.
   # We use it to manage the list of jobs, filters, and theme state.
-  provider: ^6.1.2
+  flutter_bloc: ^8.1.6
+  
+  # hydrated_bloc automatically persists and restores Cubit/Bloc state.
+  # We use it to save the user's theme preference (light/dark/system).
+  hydrated_bloc: ^9.1.5
+  
+  # path_provider helps hydrated_bloc find the correct storage path on each platform.
+  path_provider: ^2.1.4
 
   # ============================================
   # UNIQUE ID GENERATION - UUID
