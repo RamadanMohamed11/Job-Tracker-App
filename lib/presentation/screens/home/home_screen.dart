@@ -9,6 +9,7 @@ import 'widgets/search_bar_widget.dart';
 import 'widgets/filter_sort_bar.dart';
 import 'widgets/empty_state.dart';
 import '../job_form/job_form_screen.dart';
+import '../job_details/job_details_screen.dart';
 
 // ============================================
 // HOME SCREEN
@@ -146,11 +147,11 @@ class HomeScreen extends StatelessWidget {
                       return JobCard(
                         job: job,
                         onTap: () {
-                          // Navigate to edit job (tap opens edit form)
+                          // Navigate to job details
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => JobFormScreen(jobToEdit: job),
+                              builder: (_) => JobDetailsScreen(job: job),
                             ),
                           );
                         },
