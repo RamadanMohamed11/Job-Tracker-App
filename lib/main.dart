@@ -6,9 +6,17 @@ import 'package:path_provider/path_provider.dart';
 import 'core/theme/theme.dart';
 import 'core/constants/app_strings.dart';
 import 'core/services/notification_service.dart';
+import 'core/utils/page_transitions.dart';
 import 'data/local/database_service.dart';
 import 'presentation/cubits/cubits.dart';
 import 'presentation/screens/home/home_screen.dart';
+import 'presentation/screens/job_details/job_details_screen.dart';
+
+// Global navigator key for handling notification taps
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
+
+// Global JobsCubit reference for notification handling
+JobsCubit? _globalJobsCubit;
 
 // ============================================
 // WHAT IS THIS FILE?
@@ -48,10 +56,39 @@ void main() async {
   // This sets up local notifications for follow-up reminders.
   await NotificationService().initialize();
 
+  // Set up notification tap handler
+  NotificationService.onNotificationTap = (jobId) {
+    if (jobId != null) {
+      _handleNotificationTap(jobId);
+    }
+  };
+
   // ============================================
   // STEP 5: Run the App
   // ============================================
   runApp(const JobTrackerApp());
+}
+
+// ============================================
+// NOTIFICATION TAP HANDLER
+// ============================================
+// Opens job details when user taps on a notification.
+void _handleNotificationTap(String jobId) {
+  // Use a delay to ensure the app is fully loaded
+  Future.delayed(const Duration(milliseconds: 500), () {
+    final navigatorState = navigatorKey.currentState;
+    final jobsCubit = _globalJobsCubit;
+
+    if (navigatorState != null && jobsCubit != null) {
+      final job = jobsCubit.getJobById(jobId);
+
+      if (job != null) {
+        navigatorState.push(
+          FadeSlidePageRoute(page: JobDetailsScreen(job: job)),
+        );
+      }
+    }
+  });
 }
 
 // ============================================
@@ -78,7 +115,13 @@ class JobTrackerApp extends StatelessWidget {
         // Theme Cubit - manages light/dark mode
         BlocProvider<ThemeCubit>(create: (_) => ThemeCubit()),
         // Jobs Cubit - manages job applications
-        BlocProvider<JobsCubit>(create: (_) => JobsCubit()..loadJobs()),
+        BlocProvider<JobsCubit>(
+          create: (_) {
+            final cubit = JobsCubit()..loadJobs();
+            _globalJobsCubit = cubit; // Store global reference
+            return cubit;
+          },
+        ),
       ],
       child: const _AppWithTheme(),
     );
@@ -108,6 +151,9 @@ class _AppWithTheme extends StatelessWidget {
 
           // Disable the debug banner
           debugShowCheckedModeBanner: false,
+
+          // Navigator key for handling notification taps
+          navigatorKey: navigatorKey,
 
           // Light theme configuration
           theme: AppTheme.lightTheme,

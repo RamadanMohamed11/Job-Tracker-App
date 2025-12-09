@@ -78,6 +78,33 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ============================================
+          // NOTIFICATIONS SECTION
+          // ============================================
+          _SectionHeader(title: 'Notifications'),
+
+          BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) {
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: ListTile(
+                  leading: Icon(
+                    Icons.notifications_active,
+                    color: theme.colorScheme.primary,
+                  ),
+                  title: const Text('Follow-up Reminder Time'),
+                  subtitle: Text(
+                    'Notifications at ${state.formattedNotificationTime}',
+                  ),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _selectNotificationTime(context, state),
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: 24),
+
+          // ============================================
           // ABOUT SECTION
           // ============================================
           _SectionHeader(title: 'About'),
@@ -196,6 +223,36 @@ class SettingsScreen extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _selectNotificationTime(
+    BuildContext context,
+    ThemeState state,
+  ) async {
+    final TimeOfDay? picked = await showTimePicker(
+      context: context,
+      initialTime: state.notificationTime,
+      helpText: 'Select notification time',
+    );
+
+    if (picked != null && context.mounted) {
+      context.read<ThemeCubit>().setNotificationTime(picked);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Notification time set to ${_formatTime(picked)}'),
+          duration: const Duration(seconds: 2),
+        ),
+      );
+    }
+  }
+
+  String _formatTime(TimeOfDay time) {
+    final hour = time.hour;
+    final minute = time.minute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final displayMinute = minute.toString().padLeft(2, '0');
+    return '$displayHour:$displayMinute $period';
   }
 }
 

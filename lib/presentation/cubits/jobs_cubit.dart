@@ -1,4 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../core/services/notification_service.dart';
 import '../../data/data.dart';
 import '../../core/constants/status_options.dart';
 
@@ -105,6 +106,7 @@ class JobsCubit extends Cubit<JobsState> {
   // ADD JOB
   // ============================================
   /// Adds a new job application to the database.
+  /// [notificationHour] and [notificationMinute] specify when to show the reminder.
   Future<JobApplication?> addJob({
     required String jobName,
     String? companyName,
@@ -117,6 +119,8 @@ class JobsCubit extends Cubit<JobsState> {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    int notificationHour = 9,
+    int notificationMinute = 0,
   }) async {
     try {
       final job = await _repository.addJob(
@@ -132,6 +136,16 @@ class JobsCubit extends Cubit<JobsState> {
         applicationDate: applicationDate,
         status: status,
       );
+
+      // Schedule notification if follow-up date is set
+      if (followUpDate != null && followUpDate.isNotEmpty) {
+        _scheduleNotification(
+          job,
+          hour: notificationHour,
+          minute: notificationMinute,
+        );
+      }
+
       loadJobs(); // Refresh the list
       return job;
     } catch (e) {
@@ -144,6 +158,7 @@ class JobsCubit extends Cubit<JobsState> {
   // UPDATE JOB
   // ============================================
   /// Updates an existing job application.
+  /// [notificationHour] and [notificationMinute] specify when to show the reminder.
   Future<JobApplication?> updateJob({
     required String id,
     String? jobName,
@@ -157,6 +172,8 @@ class JobsCubit extends Cubit<JobsState> {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    int notificationHour = 9,
+    int notificationMinute = 0,
   }) async {
     try {
       final job = await _repository.updateJob(
@@ -174,6 +191,15 @@ class JobsCubit extends Cubit<JobsState> {
         status: status,
       );
       if (job != null) {
+        // Cancel old notification and schedule new one if follow-up date exists
+        await NotificationService().cancelNotification(id);
+        if (job.followUpDate != null && job.followUpDate!.isNotEmpty) {
+          _scheduleNotification(
+            job,
+            hour: notificationHour,
+            minute: notificationMinute,
+          );
+        }
         loadJobs(); // Refresh the list
       }
       return job;
@@ -189,6 +215,9 @@ class JobsCubit extends Cubit<JobsState> {
   /// Deletes a job application from the database.
   Future<bool> deleteJob(String id) async {
     try {
+      // Cancel any scheduled notification for this job
+      await NotificationService().cancelNotification(id);
+
       final deleted = await _repository.deleteJob(id);
       if (deleted) {
         loadJobs(); // Refresh the list
@@ -197,6 +226,34 @@ class JobsCubit extends Cubit<JobsState> {
     } catch (e) {
       emit(state.copyWith(errorMessage: 'Failed to delete job: $e'));
       return false;
+    }
+  }
+
+  // ============================================
+  // SCHEDULE NOTIFICATION HELPER
+  // ============================================
+  /// Schedules a notification for a job's follow-up date.
+  /// Uses the provided hour and minute, or defaults to 9:00 AM.
+  void _scheduleNotification(
+    JobApplication job, {
+    int hour = 9,
+    int minute = 0,
+  }) {
+    if (job.followUpDate == null || job.followUpDate!.isEmpty) return;
+
+    try {
+      final followUpDateTime = DateTime.parse(job.followUpDate!);
+      NotificationService().scheduleFollowUpNotification(
+        jobId: job.id,
+        jobName: job.jobName,
+        companyName: job.companyName,
+        followUpDate: followUpDateTime,
+        hour: hour,
+        minute: minute,
+      );
+    } catch (e) {
+      // Silently fail if date parsing fails
+      // The notification just won't be scheduled
     }
   }
 

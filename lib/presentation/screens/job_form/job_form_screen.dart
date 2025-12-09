@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../core/constants/constants.dart';
+import '../../../core/theme/theme_cubit.dart';
 import '../../../data/models/job_application.dart';
 import '../../cubits/jobs_cubit.dart';
 
@@ -434,6 +435,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
 
     try {
       final cubit = context.read<JobsCubit>();
+      // Get notification time from settings
+      final themeState = context.read<ThemeCubit>().state;
 
       if (widget.isEditing) {
         // Update existing job
@@ -462,6 +465,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
           source: _selectedSource,
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
+          notificationHour: themeState.notificationHour,
+          notificationMinute: themeState.notificationMinute,
         );
       } else {
         // Create new job
@@ -489,6 +494,8 @@ class _JobFormScreenState extends State<JobFormScreen> {
           source: _selectedSource,
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
+          notificationHour: themeState.notificationHour,
+          notificationMinute: themeState.notificationMinute,
         );
       }
 

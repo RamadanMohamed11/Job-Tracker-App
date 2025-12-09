@@ -4,9 +4,10 @@ import 'package:hydrated_bloc/hydrated_bloc.dart';
 // ============================================
 // WHAT IS THIS FILE?
 // ============================================
-// ThemeCubit manages the app's theme state (light/dark/system).
+// ThemeCubit manages the app's theme state (light/dark/system)
+// and notification time settings.
 // It uses HydratedCubit which automatically saves and restores
-// the theme preference even after the app is closed and reopened.
+// preferences even after the app is closed and reopened.
 //
 // CUBIT vs BLOC:
 // - Cubit is simpler: you call methods that emit new states
@@ -25,12 +26,18 @@ enum AppThemeMode { system, light, dark }
 // ============================================
 // THEME STATE
 // ============================================
-// The state class holds the current theme mode.
+// The state class holds the current theme mode and notification time.
 // It's immutable - we create new instances instead of modifying.
 class ThemeState {
   final AppThemeMode themeMode;
+  final int notificationHour; // 0-23
+  final int notificationMinute; // 0-59
 
-  const ThemeState({this.themeMode = AppThemeMode.system});
+  const ThemeState({
+    this.themeMode = AppThemeMode.system,
+    this.notificationHour = 9, // Default: 9:00 AM
+    this.notificationMinute = 0,
+  });
 
   // Convert Flutter's ThemeMode to our AppThemeMode
   ThemeMode get flutterThemeMode {
@@ -53,23 +60,53 @@ class ThemeState {
   }
 
   // Create a copy with different values
-  ThemeState copyWith({AppThemeMode? themeMode}) {
-    return ThemeState(themeMode: themeMode ?? this.themeMode);
+  ThemeState copyWith({
+    AppThemeMode? themeMode,
+    int? notificationHour,
+    int? notificationMinute,
+  }) {
+    return ThemeState(
+      themeMode: themeMode ?? this.themeMode,
+      notificationHour: notificationHour ?? this.notificationHour,
+      notificationMinute: notificationMinute ?? this.notificationMinute,
+    );
+  }
+
+  // Get notification time as TimeOfDay
+  TimeOfDay get notificationTime =>
+      TimeOfDay(hour: notificationHour, minute: notificationMinute);
+
+  // Format notification time for display
+  String get formattedNotificationTime {
+    final hour = notificationHour;
+    final minute = notificationMinute;
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+    final displayMinute = minute.toString().padLeft(2, '0');
+    return '$displayHour:$displayMinute $period';
   }
 
   // Equality check - needed for Cubit to know if state changed
   @override
   bool operator ==(Object other) {
     if (identical(this, other)) return true;
-    return other is ThemeState && other.themeMode == themeMode;
+    return other is ThemeState &&
+        other.themeMode == themeMode &&
+        other.notificationHour == notificationHour &&
+        other.notificationMinute == notificationMinute;
   }
 
   @override
-  int get hashCode => themeMode.hashCode;
+  int get hashCode =>
+      Object.hash(themeMode, notificationHour, notificationMinute);
 
   // Convert to JSON for persistence (HydratedBloc)
   Map<String, dynamic> toJson() {
-    return {'themeMode': themeMode.index};
+    return {
+      'themeMode': themeMode.index,
+      'notificationHour': notificationHour,
+      'notificationMinute': notificationMinute,
+    };
   }
 
   // Create from JSON when restoring (HydratedBloc)
@@ -78,6 +115,8 @@ class ThemeState {
     return ThemeState(
       themeMode:
           AppThemeMode.values[index.clamp(0, AppThemeMode.values.length - 1)],
+      notificationHour: (json['notificationHour'] as int?) ?? 9,
+      notificationMinute: (json['notificationMinute'] as int?) ?? 0,
     );
   }
 }
@@ -122,6 +161,20 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
     } else {
       emit(state.copyWith(themeMode: AppThemeMode.dark));
     }
+  }
+
+  // ============================================
+  // NOTIFICATION TIME METHODS
+  // ============================================
+
+  /// Set the notification time
+  void setNotificationTime(TimeOfDay time) {
+    emit(
+      state.copyWith(
+        notificationHour: time.hour,
+        notificationMinute: time.minute,
+      ),
+    );
   }
 
   // ============================================

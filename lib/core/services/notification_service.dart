@@ -92,11 +92,15 @@ class NotificationService {
   /// [jobName] - Name of the job position
   /// [companyName] - Company name (optional)
   /// [followUpDate] - The date/time to show the notification
+  /// [hour] - Hour to show notification (0-23), defaults to 9
+  /// [minute] - Minute to show notification (0-59), defaults to 0
   Future<void> scheduleFollowUpNotification({
     required String jobId,
     required String jobName,
     String? companyName,
     required DateTime followUpDate,
+    int hour = 9,
+    int minute = 0,
   }) async {
     // Generate a unique notification ID from the job ID
     final notificationId = jobId.hashCode.abs() % 2147483647;
@@ -131,13 +135,13 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Schedule the notification at 9:00 AM on the follow-up date
+    // Schedule the notification at the specified time on the follow-up date
     final scheduledDate = DateTime(
       followUpDate.year,
       followUpDate.month,
       followUpDate.day,
-      9, // 9:00 AM
-      0,
+      hour,
+      minute,
     );
 
     // Only schedule if the date is in the future
