@@ -8,6 +8,7 @@ import 'widgets/job_card.dart';
 import 'widgets/search_bar_widget.dart';
 import 'widgets/filter_sort_bar.dart';
 import 'widgets/empty_state.dart';
+import '../job_form/job_form_screen.dart';
 
 // ============================================
 // HOME SCREEN
@@ -145,15 +146,21 @@ class HomeScreen extends StatelessWidget {
                       return JobCard(
                         job: job,
                         onTap: () {
-                          // TODO: Navigate to job details
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('View: ${job.jobName}')),
+                          // Navigate to edit job (tap opens edit form)
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => JobFormScreen(jobToEdit: job),
+                            ),
                           );
                         },
                         onEdit: () {
-                          // TODO: Navigate to edit job
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Edit: ${job.jobName}')),
+                          // Navigate to edit job
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => JobFormScreen(jobToEdit: job),
+                            ),
                           );
                         },
                         onDelete: () =>
@@ -173,9 +180,10 @@ class HomeScreen extends StatelessWidget {
       // ============================================
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // TODO: Navigate to add job screen
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Add Job screen coming soon!')),
+          // Navigate to add job screen
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (_) => const JobFormScreen()),
           );
         },
         icon: const Icon(Icons.add),

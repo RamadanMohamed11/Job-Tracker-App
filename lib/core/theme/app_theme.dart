@@ -119,8 +119,8 @@ class AppTheme {
         elevation: 4,
       ),
 
-      // Text theme - using Inter font
-      textTheme: GoogleFonts.interTextTheme().copyWith(
+      // Text theme - using Inter font with proper theme colors
+      textTheme: TextTheme(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
           fontWeight: FontWeight.bold,
@@ -136,6 +136,11 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryLight,
         ),
+        headlineSmall: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryLight,
+        ),
         titleLarge: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -143,6 +148,11 @@ class AppTheme {
         ),
         titleMedium: GoogleFonts.inter(
           fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryLight,
+        ),
+        titleSmall: GoogleFonts.inter(
+          fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryLight,
         ),
@@ -156,10 +166,25 @@ class AppTheme {
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryLight,
         ),
+        bodySmall: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.normal,
+          color: AppColors.textSecondaryLight,
+        ),
         labelLarge: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryLight,
+        ),
+        labelMedium: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryLight,
+        ),
+        labelSmall: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondaryLight,
         ),
       ),
 
@@ -274,7 +299,8 @@ class AppTheme {
         elevation: 4,
       ),
 
-      textTheme: GoogleFonts.interTextTheme().copyWith(
+      // Text theme - using Inter font with proper theme colors for dark mode
+      textTheme: TextTheme(
         displayLarge: GoogleFonts.inter(
           fontSize: 32,
           fontWeight: FontWeight.bold,
@@ -290,6 +316,11 @@ class AppTheme {
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimaryDark,
         ),
+        headlineSmall: GoogleFonts.inter(
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimaryDark,
+        ),
         titleLarge: GoogleFonts.inter(
           fontSize: 20,
           fontWeight: FontWeight.w600,
@@ -297,6 +328,11 @@ class AppTheme {
         ),
         titleMedium: GoogleFonts.inter(
           fontSize: 16,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryDark,
+        ),
+        titleSmall: GoogleFonts.inter(
+          fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryDark,
         ),
@@ -310,10 +346,25 @@ class AppTheme {
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondaryDark,
         ),
+        bodySmall: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.normal,
+          color: AppColors.textSecondaryDark,
+        ),
         labelLarge: GoogleFonts.inter(
           fontSize: 14,
           fontWeight: FontWeight.w500,
           color: AppColors.textPrimaryDark,
+        ),
+        labelMedium: GoogleFonts.inter(
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textPrimaryDark,
+        ),
+        labelSmall: GoogleFonts.inter(
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+          color: AppColors.textSecondaryDark,
         ),
       ),
 

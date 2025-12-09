@@ -58,6 +58,7 @@ class AppStrings {
       'No job applications yet.\nTap + to add your first job!';
   static const String jobSaved = 'Job saved successfully';
   static const String jobDeleted = 'Job deleted';
+  static const String jobAdded = 'Job added successfully';
   static const String jobUpdated = 'Job updated successfully';
 
   // Dialogs
