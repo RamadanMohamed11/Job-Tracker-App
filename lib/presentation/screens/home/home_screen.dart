@@ -10,6 +10,7 @@ import 'widgets/filter_sort_bar.dart';
 import 'widgets/empty_state.dart';
 import '../job_form/job_form_screen.dart';
 import '../job_details/job_details_screen.dart';
+import '../settings/settings_screen.dart';
 
 // ============================================
 // HOME SCREEN
@@ -45,6 +46,17 @@ class HomeScreen extends StatelessWidget {
                 ),
                 onPressed: () => context.read<ThemeCubit>().toggleTheme(),
                 tooltip: 'Toggle Theme',
+              );
+            },
+          ),
+          // Settings button
+          IconButton(
+            icon: const Icon(Icons.settings),
+            tooltip: AppStrings.settings,
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
           ),
