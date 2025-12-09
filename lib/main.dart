@@ -9,8 +9,8 @@ import 'core/services/notification_service.dart';
 import 'core/utils/page_transitions.dart';
 import 'data/local/database_service.dart';
 import 'presentation/cubits/cubits.dart';
-import 'presentation/screens/home/home_screen.dart';
 import 'presentation/screens/job_details/job_details_screen.dart';
+import 'presentation/screens/splash/splash_screen.dart';
 
 // Global navigator key for handling notification taps
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
@@ -39,29 +39,42 @@ void main() async {
   // STEP 2: Initialize Hive Database
   // ============================================
   // This sets up the local storage for job applications.
-  await DatabaseService.instance.initialize();
+  try {
+    await DatabaseService.instance.initialize();
+  } catch (e) {
+    debugPrint('Database initialization error: $e');
+  }
 
   // ============================================
   // STEP 3: Initialize HydratedBloc Storage
   // ============================================
   // HydratedBloc needs a storage location to persist Cubit states.
   // We use the app's documents directory.
-  HydratedBloc.storage = await HydratedStorage.build(
-    storageDirectory: await getApplicationDocumentsDirectory(),
-  );
+  try {
+    HydratedBloc.storage = await HydratedStorage.build(
+      storageDirectory: await getApplicationDocumentsDirectory(),
+    );
+  } catch (e) {
+    debugPrint('HydratedBloc initialization error: $e');
+    // Fallback: use a no-op storage
+  }
 
   // ============================================
   // STEP 4: Initialize Notification Service
   // ============================================
   // This sets up local notifications for follow-up reminders.
-  await NotificationService().initialize();
+  try {
+    await NotificationService().initialize();
 
-  // Set up notification tap handler
-  NotificationService.onNotificationTap = (jobId) {
-    if (jobId != null) {
-      _handleNotificationTap(jobId);
-    }
-  };
+    // Set up notification tap handler
+    NotificationService.onNotificationTap = (jobId) {
+      if (jobId != null) {
+        _handleNotificationTap(jobId);
+      }
+    };
+  } catch (e) {
+    debugPrint('Notification service initialization error: $e');
+  }
 
   // ============================================
   // STEP 5: Run the App
@@ -164,8 +177,8 @@ class _AppWithTheme extends StatelessWidget {
           // Which theme to use: light, dark, or system
           themeMode: themeState.flutterThemeMode,
 
-          // Home screen
-          home: const HomeScreen(),
+          // Splash screen (then navigates to home)
+          home: const SplashScreen(),
         );
       },
     );
