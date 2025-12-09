@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/constants.dart';
 import '../../../core/theme/theme_cubit.dart';
+import '../../../core/utils/page_transitions.dart';
+import '../../../core/utils/animations.dart';
 import '../../cubits/jobs_cubit.dart';
 import 'widgets/job_card.dart';
 import 'widgets/search_bar_widget.dart';
@@ -56,7 +58,7 @@ class HomeScreen extends StatelessWidget {
             onPressed: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
+                FadeSlidePageRoute(page: const SettingsScreen()),
               );
             },
           ),
@@ -156,28 +158,31 @@ class HomeScreen extends StatelessWidget {
                     itemCount: state.filteredJobs.length,
                     itemBuilder: (context, index) {
                       final job = state.filteredJobs[index];
-                      return JobCard(
-                        job: job,
-                        onTap: () {
-                          // Navigate to job details
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => JobDetailsScreen(job: job),
-                            ),
-                          );
-                        },
-                        onEdit: () {
-                          // Navigate to edit job
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => JobFormScreen(jobToEdit: job),
-                            ),
-                          );
-                        },
-                        onDelete: () =>
-                            _confirmDelete(context, job.id, job.jobName),
+                      return StaggeredAnimationWrapper(
+                        index: index,
+                        child: JobCard(
+                          job: job,
+                          onTap: () {
+                            // Navigate to job details with animation
+                            Navigator.push(
+                              context,
+                              FadeSlidePageRoute(
+                                page: JobDetailsScreen(job: job),
+                              ),
+                            );
+                          },
+                          onEdit: () {
+                            // Navigate to edit job with animation
+                            Navigator.push(
+                              context,
+                              FadeSlidePageRoute(
+                                page: JobFormScreen(jobToEdit: job),
+                              ),
+                            );
+                          },
+                          onDelete: () =>
+                              _confirmDelete(context, job.id, job.jobName),
+                        ),
                       );
                     },
                   ),
@@ -193,10 +198,10 @@ class HomeScreen extends StatelessWidget {
       // ============================================
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          // Navigate to add job screen
+          // Navigate to add job screen with animation
           Navigator.push(
             context,
-            MaterialPageRoute(builder: (_) => const JobFormScreen()),
+            FadeSlidePageRoute(page: const JobFormScreen()),
           );
         },
         icon: const Icon(Icons.add),

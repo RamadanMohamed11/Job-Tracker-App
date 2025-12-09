@@ -4,6 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/constants/constants.dart';
+import '../../../core/utils/page_transitions.dart';
 import '../../../data/models/job_application.dart';
 import '../../cubits/jobs_cubit.dart';
 import '../job_form/job_form_screen.dart';
@@ -290,7 +291,7 @@ class JobDetailsScreen extends StatelessWidget {
   void _navigateToEdit(BuildContext context) {
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (_) => JobFormScreen(jobToEdit: job)),
+      FadeSlidePageRoute(page: JobFormScreen(jobToEdit: job)),
     );
   }
 
