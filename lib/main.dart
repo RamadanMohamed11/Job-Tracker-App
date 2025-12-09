@@ -7,6 +7,7 @@ import 'core/theme/theme.dart';
 import 'core/constants/app_strings.dart';
 import 'data/local/database_service.dart';
 import 'presentation/cubits/cubits.dart';
+import 'presentation/screens/home/home_screen.dart';
 
 // ============================================
 // WHAT IS THIS FILE?
@@ -109,85 +110,10 @@ class _AppWithTheme extends StatelessWidget {
           // Which theme to use: light, dark, or system
           themeMode: themeState.flutterThemeMode,
 
-          // Home screen - we'll create this next!
-          // For now, show a placeholder
-          home: const _PlaceholderHomeScreen(),
+          // Home screen
+          home: const HomeScreen(),
         );
       },
-    );
-  }
-}
-
-// ============================================
-// PLACEHOLDER HOME SCREEN
-// ============================================
-// Temporary screen until we build the real UI.
-// This lets us test that everything works.
-class _PlaceholderHomeScreen extends StatelessWidget {
-  const _PlaceholderHomeScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(AppStrings.appName),
-        actions: [
-          // Theme toggle button
-          IconButton(
-            icon: Icon(
-              Theme.of(context).brightness == Brightness.dark
-                  ? Icons.light_mode
-                  : Icons.dark_mode,
-            ),
-            onPressed: () {
-              // Toggle theme when pressed
-              context.read<ThemeCubit>().toggleTheme();
-            },
-            tooltip: 'Toggle Theme',
-          ),
-        ],
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.work_outline,
-              size: 80,
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(height: 24),
-            Text(
-              AppStrings.appName,
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Theme & Bloc setup complete!',
-              style: Theme.of(context).textTheme.bodyLarge,
-            ),
-            const SizedBox(height: 32),
-            // Show current job count from JobsCubit
-            BlocBuilder<JobsCubit, JobsState>(
-              builder: (context, state) {
-                return Text(
-                  'Total Jobs: ${state.totalCount}',
-                  style: Theme.of(context).textTheme.titleMedium,
-                );
-              },
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          // Placeholder - will navigate to add job screen later
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Add Job screen coming soon!')),
-          );
-        },
-        child: const Icon(Icons.add),
-      ),
     );
   }
 }
