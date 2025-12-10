@@ -239,7 +239,10 @@ class JobCard extends StatelessWidget {
                   ],
                   // Source
                   if (job.source != null && job.source!.isNotEmpty) ...[
-                    _InfoChip(icon: Icons.source, label: job.source!),
+                    _InfoChip(
+                      icon: _getSourceIcon(job.source!),
+                      label: job.source!,
+                    ),
                   ],
                   // Follow-up date
                   if (job.followUpDate != null) ...[
@@ -347,6 +350,28 @@ class JobCard extends StatelessWidget {
       Colors.lime,
     ];
     return colors[tag.hashCode.abs() % colors.length];
+  }
+
+  // Get icon for job source
+  IconData _getSourceIcon(String source) {
+    final sourceLower = source.toLowerCase();
+    if (sourceLower.contains('linkedin')) return Icons.business_center;
+    if (sourceLower.contains('indeed')) return Icons.search;
+    if (sourceLower.contains('wuzzuf')) return Icons.work;
+    if (sourceLower.contains('glassdoor')) return Icons.door_front_door;
+    if (sourceLower.contains('bayt')) return Icons.home_work;
+    if (sourceLower.contains('whatsapp')) return Icons.chat;
+    if (sourceLower.contains('company') || sourceLower.contains('website')) {
+      return Icons.language;
+    }
+    if (sourceLower.contains('referral')) return Icons.people;
+    if (sourceLower.contains('recruiter')) return Icons.person_search;
+    if (sourceLower.contains('github')) return Icons.code;
+    if (sourceLower.contains('stack overflow')) return Icons.layers;
+    if (sourceLower.contains('twitter') || sourceLower.contains('x')) {
+      return Icons.alternate_email;
+    }
+    return Icons.source; // Default
   }
 }
 
