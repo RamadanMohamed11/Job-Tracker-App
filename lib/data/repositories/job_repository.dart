@@ -335,4 +335,41 @@ class JobRepository {
     final unpinned = jobs.where((j) => !j.isPinned).toList();
     return [...pinned, ...unpinned];
   }
+
+  // ============================================
+  // TOGGLE ARCHIVE STATUS
+  // ============================================
+  /// Toggles the archived status of a job.
+  /// Returns the updated job, or null if job not found.
+  Future<JobApplication?> toggleArchive(String id) async {
+    final existingJob = _databaseService.jobsBox.get(id);
+
+    if (existingJob == null) {
+      return null;
+    }
+
+    final updatedJob = existingJob.copyWith(
+      isArchived: !existingJob.isArchived,
+      updatedAt: DateTime.now().toIso8601String(),
+    );
+
+    await _databaseService.jobsBox.put(id, updatedJob);
+    return updatedJob;
+  }
+
+  // ============================================
+  // GET ACTIVE JOBS (NOT ARCHIVED)
+  // ============================================
+  /// Returns all jobs that are NOT archived.
+  List<JobApplication> getActiveJobs() {
+    return getAllJobs().where((job) => !job.isArchived).toList();
+  }
+
+  // ============================================
+  // GET ARCHIVED JOBS
+  // ============================================
+  /// Returns all jobs that ARE archived.
+  List<JobApplication> getArchivedJobs() {
+    return getAllJobs().where((job) => job.isArchived).toList();
+  }
 }

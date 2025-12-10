@@ -24,6 +24,7 @@ class JobCard extends StatelessWidget {
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
   final VoidCallback? onPin;
+  final VoidCallback? onArchive;
 
   const JobCard({
     super.key,
@@ -33,6 +34,7 @@ class JobCard extends StatelessWidget {
     this.onEdit,
     this.onDelete,
     this.onPin,
+    this.onArchive,
   });
 
   @override
@@ -48,11 +50,31 @@ class JobCard extends StatelessWidget {
       child: hasSlideActions
           ? Slidable(
               // ============================================
-              // SLIDE ACTIONS (Swipe left to reveal)
+              // SLIDE LEFT ACTIONS (Swipe right to reveal) - Archive
+              // ============================================
+              startActionPane: ActionPane(
+                motion: const BehindMotion(),
+                extentRatio: 0.35,
+                children: [
+                  SlidableAction(
+                    onPressed: (_) => onArchive?.call(),
+                    backgroundColor: job.isArchived
+                        ? Colors.teal
+                        : Colors.blueGrey,
+                    foregroundColor: Colors.white,
+                    icon: job.isArchived ? Icons.unarchive : Icons.archive,
+                    label: job.isArchived ? 'Unarchive' : 'Archive',
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ],
+              ),
+
+              // ============================================
+              // SLIDE RIGHT ACTIONS (Swipe left to reveal)
               // ============================================
               endActionPane: ActionPane(
                 motion: const BehindMotion(),
-                extentRatio: 0.6,
+                extentRatio: 0.85,
                 children: [
                   // Pin action
                   SlidableAction(
@@ -121,6 +143,7 @@ class JobCard extends StatelessWidget {
                       children: [
                         Row(
                           children: [
+                            // Pinned indicator
                             if (job.isPinned) ...[
                               Icon(
                                 Icons.push_pin,
@@ -129,12 +152,51 @@ class JobCard extends StatelessWidget {
                               ),
                               const SizedBox(width: 4),
                             ],
+                            // Archived indicator
+                            if (job.isArchived) ...[
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: Colors.blueGrey.withAlpha(40),
+                                  borderRadius: BorderRadius.circular(4),
+                                  border: Border.all(
+                                    color: Colors.blueGrey,
+                                    width: 1,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    const Icon(
+                                      Icons.archive,
+                                      size: 12,
+                                      color: Colors.blueGrey,
+                                    ),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      'Archived',
+                                      style: theme.textTheme.labelSmall
+                                          ?.copyWith(
+                                            color: Colors.blueGrey,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                            ],
                             Expanded(
                               child: Text(
                                 job.jobName,
                                 style: theme.textTheme.titleMedium?.copyWith(
                                   fontWeight: FontWeight.w600,
-                                  color: theme.colorScheme.primary,
+                                  color: job.isArchived
+                                      ? Colors.blueGrey
+                                      : theme.colorScheme.primary,
                                 ),
                                 maxLines: 2,
                                 overflow: TextOverflow.ellipsis,

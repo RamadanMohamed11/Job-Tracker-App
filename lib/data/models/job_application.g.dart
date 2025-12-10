@@ -31,14 +31,15 @@ class JobApplicationAdapter extends TypeAdapter<JobApplication> {
       status: fields[11] as String?,
       createdAt: fields[12] as String,
       updatedAt: fields[13] as String,
-      isPinned: fields[14] as bool,
+      isPinned: fields[14] as bool? ?? false,
+      isArchived: fields[15] as bool? ?? false,
     );
   }
 
   @override
   void write(BinaryWriter writer, JobApplication obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(16)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -68,7 +69,9 @@ class JobApplicationAdapter extends TypeAdapter<JobApplication> {
       ..writeByte(13)
       ..write(obj.updatedAt)
       ..writeByte(14)
-      ..write(obj.isPinned);
+      ..write(obj.isPinned)
+      ..writeByte(15)
+      ..write(obj.isArchived);
   }
 
   @override

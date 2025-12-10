@@ -45,6 +45,8 @@ class JobsState {
   final Set<String> selectedJobIds;
   // Dashboard filter
   final DashboardFilter dashboardFilter;
+  // Archive toggle
+  final bool showArchived;
 
   const JobsState({
     this.jobs = const [],
@@ -57,6 +59,7 @@ class JobsState {
     this.isSelectionMode = false,
     this.selectedJobIds = const {},
     this.dashboardFilter = DashboardFilter.totalJobs,
+    this.showArchived = false,
   });
 
   // Create a copy with different values
@@ -73,6 +76,7 @@ class JobsState {
     bool? isSelectionMode,
     Set<String>? selectedJobIds,
     DashboardFilter? dashboardFilter,
+    bool? showArchived,
   }) {
     return JobsState(
       jobs: jobs ?? this.jobs,
@@ -87,6 +91,7 @@ class JobsState {
       isSelectionMode: isSelectionMode ?? this.isSelectionMode,
       selectedJobIds: selectedJobIds ?? this.selectedJobIds,
       dashboardFilter: dashboardFilter ?? this.dashboardFilter,
+      showArchived: showArchived ?? this.showArchived,
     );
   }
 
@@ -571,6 +576,11 @@ class JobsCubit extends Cubit<JobsState> {
           .toList();
     }
 
+    // Apply archive filter - hide archived jobs unless showArchived is true
+    if (!state.showArchived) {
+      result = result.where((job) => !job.isArchived).toList();
+    }
+
     // Apply dashboard filter
     final now = DateTime.now();
     switch (state.dashboardFilter) {
@@ -669,5 +679,34 @@ class JobsCubit extends Cubit<JobsState> {
     } catch (e) {
       emit(state.copyWith(errorMessage: 'Failed to toggle pin: $e'));
     }
+  }
+
+  // ============================================
+  // TOGGLE ARCHIVE
+  // ============================================
+  /// Toggles the archived status of a job.
+  /// Archived jobs are hidden from the main list.
+  Future<void> toggleArchive(String id) async {
+    try {
+      final updatedJob = await _repository.toggleArchive(id);
+      if (updatedJob != null) {
+        // Cancel notification if archiving
+        if (updatedJob.isArchived) {
+          await NotificationService().cancelNotification(id);
+        }
+        loadJobs(); // Refresh the list
+      }
+    } catch (e) {
+      emit(state.copyWith(errorMessage: 'Failed to toggle archive: $e'));
+    }
+  }
+
+  // ============================================
+  // SET SHOW ARCHIVED
+  // ============================================
+  /// Sets whether to show archived jobs.
+  void setShowArchived(bool showArchived) {
+    emit(state.copyWith(showArchived: showArchived));
+    _applyFiltersAndSort();
   }
 }

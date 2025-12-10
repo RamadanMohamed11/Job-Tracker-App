@@ -142,6 +142,31 @@ class SettingsScreen extends StatelessWidget {
                     MaterialPageRoute(builder: (_) => const InsightsScreen()),
                   ),
                 ),
+                const Divider(height: 1),
+                BlocBuilder<JobsCubit, JobsState>(
+                  builder: (context, jobsState) {
+                    return ListTile(
+                      leading: Icon(
+                        jobsState.showArchived
+                            ? Icons.visibility
+                            : Icons.visibility_off,
+                        color: Colors.blueGrey,
+                      ),
+                      title: const Text('View Archived Jobs'),
+                      subtitle: Text(
+                        jobsState.showArchived
+                            ? 'Showing archived jobs'
+                            : 'Archived jobs are hidden',
+                      ),
+                      trailing: Switch(
+                        value: jobsState.showArchived,
+                        onChanged: (value) {
+                          context.read<JobsCubit>().setShowArchived(value);
+                        },
+                      ),
+                    );
+                  },
+                ),
               ],
             ),
           ),
