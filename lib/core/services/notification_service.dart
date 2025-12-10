@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz_data;
 
@@ -36,9 +37,12 @@ class NotificationService {
     // Initialize timezone database
     tz_data.initializeTimeZones();
 
-    // Android settings
+    // Set the local timezone based on device timezone
+    await _configureLocalTimezone();
+
+    // Android settings - use launcher_icon to match AndroidManifest.xml
     const androidSettings = AndroidInitializationSettings(
-      '@mipmap/ic_launcher', // Use the app icon
+      '@mipmap/launcher_icon',
     );
 
     // iOS settings
@@ -69,17 +73,42 @@ class NotificationService {
   }
 
   // ============================================
+  // CONFIGURE LOCAL TIMEZONE
+  // ============================================
+  Future<void> _configureLocalTimezone() async {
+    try {
+      final String timeZoneName = await FlutterTimezone.getLocalTimezone();
+      tz.setLocalLocation(tz.getLocation(timeZoneName));
+      debugPrint('Timezone set to: $timeZoneName');
+    } catch (e) {
+      // Fallback to UTC if timezone detection fails
+      debugPrint('Failed to get timezone, using UTC: $e');
+      tz.setLocalLocation(tz.getLocation('UTC'));
+    }
+  }
+
+  // ============================================
   // REQUEST PERMISSIONS
   // ============================================
   Future<void> _requestAndroidPermissions() async {
-    final androidPlugin = _notifications
-        .resolvePlatformSpecificImplementation<
-          AndroidFlutterLocalNotificationsPlugin
-        >();
+    try {
+      final androidPlugin = _notifications
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >();
 
-    if (androidPlugin != null) {
-      await androidPlugin.requestNotificationsPermission();
-      await androidPlugin.requestExactAlarmsPermission();
+      if (androidPlugin != null) {
+        // Request notification permission (Android 13+)
+        final notificationGranted = await androidPlugin
+            .requestNotificationsPermission();
+        debugPrint('Notification permission granted: $notificationGranted');
+
+        // Request exact alarm permission (Android 12+)
+        final alarmGranted = await androidPlugin.requestExactAlarmsPermission();
+        debugPrint('Exact alarm permission granted: $alarmGranted');
+      }
+    } catch (e) {
+      debugPrint('Error requesting Android permissions: $e');
     }
   }
 
@@ -102,28 +131,111 @@ class NotificationService {
     int hour = 9,
     int minute = 0,
   }) async {
-    // Generate a unique notification ID from the job ID
-    final notificationId = jobId.hashCode.abs() % 2147483647;
+    debugPrint('scheduleFollowUpNotification called for job: $jobName');
+    debugPrint('  followUpDate: $followUpDate, hour: $hour, minute: $minute');
 
-    // Create the notification content
-    final title = 'Follow-up Reminder 📋';
-    final body = companyName != null && companyName.isNotEmpty
-        ? 'Time to follow up on your "$jobName" application at $companyName'
-        : 'Time to follow up on your "$jobName" application';
+    try {
+      // Generate a unique notification ID from the job ID
+      final notificationId = jobId.hashCode.abs() % 2147483647;
 
-    // Android notification details
+      // Create the notification content
+      final title = 'Follow-up Reminder 📋';
+      final body = companyName != null && companyName.isNotEmpty
+          ? 'Time to follow up on your "$jobName" application at $companyName'
+          : 'Time to follow up on your "$jobName" application';
+
+      // Android notification details
+      // Use launcher_icon which matches the app icon defined in AndroidManifest.xml
+      const androidDetails = AndroidNotificationDetails(
+        'follow_up_reminders', // Channel ID
+        'Follow-up Reminders', // Channel name
+        channelDescription: 'Reminders for job application follow-ups',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/launcher_icon', // Must match AndroidManifest.xml icon
+        enableVibration: true,
+        playSound: true,
+      );
+
+      // iOS notification details
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      // Schedule the notification at the specified time on the follow-up date
+      final scheduledDate = DateTime(
+        followUpDate.year,
+        followUpDate.month,
+        followUpDate.day,
+        hour,
+        minute,
+      );
+
+      debugPrint('  Calculated scheduled date: $scheduledDate');
+      debugPrint('  Current time: ${DateTime.now()}');
+      debugPrint('  Is in future: ${scheduledDate.isAfter(DateTime.now())}');
+
+      // Only schedule if the date is in the future
+      if (scheduledDate.isAfter(DateTime.now())) {
+        final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+        debugPrint('  TZ scheduled date: $tzScheduledDate');
+
+        await _notifications.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          tzScheduledDate,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: jobId, // Store job ID to open details on tap
+        );
+
+        debugPrint(
+          '✅ Scheduled notification ID $notificationId for job $jobId on $scheduledDate',
+        );
+      } else {
+        debugPrint(
+          '⚠️ Follow-up date $scheduledDate is in the past, not scheduling notification',
+        );
+      }
+    } catch (e, stack) {
+      debugPrint('❌ Error scheduling notification: $e');
+      debugPrint('Stack trace: $stack');
+    }
+  }
+
+  // ============================================
+  // TEST SCHEDULED NOTIFICATION (for debugging)
+  // ============================================
+  /// Schedules a test notification for 10 seconds from now.
+  Future<void> testScheduledNotification() async {
+    debugPrint(
+      'testScheduledNotification: Scheduling notification in 10 seconds...',
+    );
+
+    final scheduledTime = DateTime.now().add(const Duration(seconds: 10));
+    debugPrint('  Scheduled for: $scheduledTime');
+
     const androidDetails = AndroidNotificationDetails(
-      'follow_up_reminders', // Channel ID
-      'Follow-up Reminders', // Channel name
+      'follow_up_reminders',
+      'Follow-up Reminders',
       channelDescription: 'Reminders for job application follow-ups',
       importance: Importance.high,
       priority: Priority.high,
-      icon: '@mipmap/ic_launcher',
+      icon: '@mipmap/launcher_icon',
       enableVibration: true,
       playSound: true,
     );
 
-    // iOS notification details
     const iosDetails = DarwinNotificationDetails(
       presentAlert: true,
       presentBadge: true,
@@ -135,34 +247,25 @@ class NotificationService {
       iOS: iosDetails,
     );
 
-    // Schedule the notification at the specified time on the follow-up date
-    final scheduledDate = DateTime(
-      followUpDate.year,
-      followUpDate.month,
-      followUpDate.day,
-      hour,
-      minute,
-    );
+    try {
+      final tzScheduledTime = tz.TZDateTime.from(scheduledTime, tz.local);
+      debugPrint('  TZ scheduled time: $tzScheduledTime');
 
-    // Only schedule if the date is in the future
-    if (scheduledDate.isAfter(DateTime.now())) {
       await _notifications.zonedSchedule(
-        notificationId,
-        title,
-        body,
-        tz.TZDateTime.from(scheduledDate, tz.local),
+        999999, // Test notification ID
+        'Scheduled Test ⏰',
+        'This notification was scheduled 10 seconds ago!',
+        tzScheduledTime,
         notificationDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         uiLocalNotificationDateInterpretation:
             UILocalNotificationDateInterpretation.absoluteTime,
-        payload: jobId, // Store job ID to open details on tap
       );
 
-      debugPrint('Scheduled notification for job $jobId on $scheduledDate');
-    } else {
-      debugPrint(
-        'Follow-up date $scheduledDate is in the past, not scheduling notification',
-      );
+      debugPrint('✅ Test notification scheduled successfully!');
+    } catch (e, stack) {
+      debugPrint('❌ Error scheduling test notification: $e');
+      debugPrint('Stack trace: $stack');
     }
   }
 

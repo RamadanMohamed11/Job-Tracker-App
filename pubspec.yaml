@@ -112,6 +112,13 @@ dependencies:
   # Required for scheduling notifications with flutter_local_notifications.
   timezone: ^0.9.4
 
+  # ============================================
+  # DEVICE TIMEZONE - flutter_timezone
+  # ============================================
+  # flutter_timezone gets the device's current timezone name.
+  # Required to set tz.local correctly for scheduled notifications in release mode.
+  flutter_timezone: ^3.0.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

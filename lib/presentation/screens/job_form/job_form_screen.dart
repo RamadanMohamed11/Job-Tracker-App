@@ -431,11 +431,30 @@ class _JobFormScreenState extends State<JobFormScreen> {
       return;
     }
 
+    final cubit = context.read<JobsCubit>();
+
+    // Check for duplicates before saving
+    final duplicates = cubit.findDuplicates(
+      jobName: _jobNameController.text.trim(),
+      companyName: _companyNameController.text.trim().isEmpty
+          ? null
+          : _companyNameController.text.trim(),
+      excludeJobId: widget.isEditing ? widget.jobToEdit!.id : null,
+    );
+
+    // If duplicates found, show warning dialog
+    if (duplicates.isNotEmpty) {
+      final shouldProceed = await _showDuplicateWarning(duplicates);
+      if (shouldProceed != true) {
+        return; // User cancelled
+      }
+    }
+
     setState(() => _isLoading = true);
 
     try {
-      final cubit = context.read<JobsCubit>();
       // Get notification time from settings
+      if (!mounted) return;
       final themeState = context.read<ThemeCubit>().state;
 
       if (widget.isEditing) {
@@ -522,5 +541,90 @@ class _JobFormScreenState extends State<JobFormScreen> {
         setState(() => _isLoading = false);
       }
     }
+  }
+
+  // ============================================
+  // DUPLICATE WARNING DIALOG
+  // ============================================
+  Future<bool?> _showDuplicateWarning(List<JobApplication> duplicates) {
+    return showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        icon: const Icon(
+          Icons.warning_amber_rounded,
+          size: 48,
+          color: Colors.orange,
+        ),
+        title: const Text('Potential Duplicate'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'A similar job application already exists:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            const SizedBox(height: 12),
+            ...duplicates
+                .take(3)
+                .map(
+                  (job) => Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.surfaceContainerHighest,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            job.jobName,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          if (job.companyName != null &&
+                              job.companyName!.isNotEmpty)
+                            Text(
+                              job.companyName!,
+                              style: TextStyle(
+                                color: Theme.of(context).colorScheme.outline,
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            if (duplicates.length > 3)
+              Text(
+                '...and ${duplicates.length - 3} more',
+                style: TextStyle(
+                  color: Theme.of(context).colorScheme.outline,
+                  fontStyle: FontStyle.italic,
+                ),
+              ),
+            const SizedBox(height: 8),
+            const Text('Do you still want to save this job?'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Save Anyway'),
+          ),
+        ],
+      ),
+    );
   }
 }
