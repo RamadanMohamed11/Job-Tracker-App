@@ -214,6 +214,109 @@ class NotificationService {
   }
 
   // ============================================
+  // SCHEDULE INTERVIEW PREP NOTIFICATION
+  // ============================================
+  /// Schedules an interview prep reminder notification.
+  /// Uses jobId_interview as the unique notification ID.
+  Future<void> scheduleInterviewPrepNotification({
+    required String jobId,
+    required String jobName,
+    String? companyName,
+    required DateTime interviewDate,
+    required DateTime reminderDate,
+    int hour = 9,
+    int minute = 0,
+  }) async {
+    debugPrint('scheduleInterviewPrepNotification called:');
+    debugPrint('  jobId: $jobId');
+    debugPrint('  jobName: $jobName');
+    debugPrint('  companyName: $companyName');
+    debugPrint('  interviewDate: $interviewDate');
+    debugPrint('  reminderDate: $reminderDate');
+    debugPrint('  hour: $hour, minute: $minute');
+
+    try {
+      // Generate unique notification ID from job ID with "_interview" suffix
+      final notificationId = '${jobId}_interview'.hashCode.abs() % 2147483647;
+      debugPrint('  Generated notification ID: $notificationId');
+
+      // Create the notification content
+      final title = 'Interview Prep Reminder 🎯';
+      final formattedDate =
+          '${interviewDate.day}/${interviewDate.month}/${interviewDate.year}';
+      final body = companyName != null && companyName.isNotEmpty
+          ? 'Your interview for "$jobName" at $companyName is tomorrow ($formattedDate)! Time to prepare!'
+          : 'Your interview for "$jobName" is tomorrow ($formattedDate)! Time to prepare!';
+
+      // Android notification details
+      const androidDetails = AndroidNotificationDetails(
+        'interview_prep_reminders', // Channel ID
+        'Interview Prep Reminders', // Channel name
+        channelDescription: 'Reminders to prepare for upcoming interviews',
+        importance: Importance.high,
+        priority: Priority.high,
+        icon: '@mipmap/launcher_icon',
+        enableVibration: true,
+        playSound: true,
+      );
+
+      // iOS notification details
+      const iosDetails = DarwinNotificationDetails(
+        presentAlert: true,
+        presentBadge: true,
+        presentSound: true,
+      );
+
+      const notificationDetails = NotificationDetails(
+        android: androidDetails,
+        iOS: iosDetails,
+      );
+
+      // Schedule the notification at the specified time on the reminder date
+      final scheduledDate = DateTime(
+        reminderDate.year,
+        reminderDate.month,
+        reminderDate.day,
+        hour,
+        minute,
+      );
+
+      debugPrint('  Calculated scheduled date: $scheduledDate');
+      debugPrint('  Current time: ${DateTime.now()}');
+      debugPrint('  Is in future: ${scheduledDate.isAfter(DateTime.now())}');
+
+      // Only schedule if the date is in the future
+      if (scheduledDate.isAfter(DateTime.now())) {
+        final tzScheduledDate = tz.TZDateTime.from(scheduledDate, tz.local);
+        debugPrint('  TZ scheduled date: $tzScheduledDate');
+
+        await _notifications.zonedSchedule(
+          notificationId,
+          title,
+          body,
+          tzScheduledDate,
+          notificationDetails,
+          androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
+          uiLocalNotificationDateInterpretation:
+              UILocalNotificationDateInterpretation.absoluteTime,
+          payload: jobId, // Store job ID to open details on tap
+        );
+
+        debugPrint(
+          '✅ Scheduled interview prep notification ID $notificationId for job $jobId on $scheduledDate',
+        );
+      } else {
+        debugPrint(
+          '⚠️ Reminder date $scheduledDate is in the past, not scheduling notification',
+        );
+      }
+    } catch (e, stack) {
+      debugPrint('❌ Error scheduling interview prep notification: $e');
+      debugPrint('Stack trace: $stack');
+    }
+  }
+
+  // ============================================
   // TEST SCHEDULED NOTIFICATION (for debugging)
   // ============================================
   /// Schedules a test notification for 10 seconds from now.

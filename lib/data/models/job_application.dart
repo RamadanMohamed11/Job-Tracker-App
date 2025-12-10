@@ -108,6 +108,10 @@ class JobApplication extends HiveObject {
   @HiveField(15)
   final bool isArchived;
 
+  /// Interview date and time (for interview prep reminders)
+  @HiveField(16)
+  final String? interviewDate;
+
   // ============================================
   // CONSTRUCTOR
   // ============================================
@@ -131,6 +135,7 @@ class JobApplication extends HiveObject {
     required this.updatedAt,
     this.isPinned = false,
     this.isArchived = false,
+    this.interviewDate,
   });
 
   // ============================================
@@ -173,6 +178,7 @@ class JobApplication extends HiveObject {
     String? updatedAt,
     bool? isPinned,
     bool? isArchived,
+    String? interviewDate,
   }) {
     return JobApplication(
       id: id ?? this.id,
@@ -191,6 +197,7 @@ class JobApplication extends HiveObject {
       updatedAt: updatedAt ?? DateTime.now().toIso8601String(),
       isPinned: isPinned ?? this.isPinned,
       isArchived: isArchived ?? this.isArchived,
+      interviewDate: interviewDate ?? this.interviewDate,
     );
   }
 
@@ -218,6 +225,7 @@ class JobApplication extends HiveObject {
       'updatedAt': updatedAt,
       'isPinned': isPinned,
       'isArchived': isArchived,
+      'interviewDate': interviewDate,
     };
   }
 
@@ -240,11 +248,12 @@ class JobApplication extends HiveObject {
       updatedAt: map['updatedAt'] as String,
       isPinned: map['isPinned'] as bool? ?? false,
       isArchived: map['isArchived'] as bool? ?? false,
+      interviewDate: map['interviewDate'] as String?,
     );
   }
 
   @override
   String toString() {
-    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status, isPinned: $isPinned, isArchived: $isArchived)';
+    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status, interviewDate: $interviewDate)';
   }
 }

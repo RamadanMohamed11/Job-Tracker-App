@@ -245,6 +245,7 @@ class JobsCubit extends Cubit<JobsState> {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    String? interviewDate,
     int notificationHour = 9,
     int notificationMinute = 0,
   }) async {
@@ -261,11 +262,21 @@ class JobsCubit extends Cubit<JobsState> {
         contactEmail: contactEmail,
         applicationDate: applicationDate,
         status: status,
+        interviewDate: interviewDate,
       );
 
       // Schedule notification if follow-up date is set
       if (followUpDate != null && followUpDate.isNotEmpty) {
         _scheduleNotification(
+          job,
+          hour: notificationHour,
+          minute: notificationMinute,
+        );
+      }
+
+      // Schedule interview prep notification if interview date is set
+      if (interviewDate != null && interviewDate.isNotEmpty) {
+        _scheduleInterviewNotification(
           job,
           hour: notificationHour,
           minute: notificationMinute,
@@ -298,6 +309,7 @@ class JobsCubit extends Cubit<JobsState> {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    String? interviewDate,
     int notificationHour = 9,
     int notificationMinute = 0,
   }) async {
@@ -315,10 +327,13 @@ class JobsCubit extends Cubit<JobsState> {
         contactEmail: contactEmail,
         applicationDate: applicationDate,
         status: status,
+        interviewDate: interviewDate,
       );
       if (job != null) {
         // Cancel old notification and schedule new one if follow-up date exists
         await NotificationService().cancelNotification(id);
+        await NotificationService().cancelNotification('${id}_interview');
+
         if (job.followUpDate != null && job.followUpDate!.isNotEmpty) {
           _scheduleNotification(
             job,
@@ -326,6 +341,16 @@ class JobsCubit extends Cubit<JobsState> {
             minute: notificationMinute,
           );
         }
+
+        // Schedule interview prep notification if interview date is set
+        if (job.interviewDate != null && job.interviewDate!.isNotEmpty) {
+          _scheduleInterviewNotification(
+            job,
+            hour: notificationHour,
+            minute: notificationMinute,
+          );
+        }
+
         loadJobs(); // Refresh the list
       }
       return job;
@@ -461,6 +486,61 @@ class JobsCubit extends Cubit<JobsState> {
   }
 
   // ============================================
+  // SCHEDULE INTERVIEW NOTIFICATION HELPER
+  // ============================================
+  /// Schedules an interview prep notification 1 day before interview date.
+  Future<void> _scheduleInterviewNotification(
+    JobApplication job, {
+    int hour = 9,
+    int minute = 0,
+  }) async {
+    debugPrint('_scheduleInterviewNotification called for job: ${job.jobName}');
+    debugPrint('  interviewDate: ${job.interviewDate}');
+    debugPrint('  hour: $hour, minute: $minute');
+
+    if (job.interviewDate == null || job.interviewDate!.isEmpty) {
+      debugPrint('  ⚠️ No interview date, skipping notification');
+      return;
+    }
+
+    try {
+      final interviewDateTime = DateTime.parse(job.interviewDate!);
+      debugPrint('  Parsed interview date: $interviewDateTime');
+
+      // Schedule notification 1 day before interview at the specified time
+      final reminderDate = interviewDateTime.subtract(const Duration(days: 1));
+
+      // Only schedule if reminder date is in the future
+      final now = DateTime.now();
+      final scheduledTime = DateTime(
+        reminderDate.year,
+        reminderDate.month,
+        reminderDate.day,
+        hour,
+        minute,
+      );
+
+      if (scheduledTime.isAfter(now)) {
+        await NotificationService().scheduleInterviewPrepNotification(
+          jobId: job.id,
+          jobName: job.jobName,
+          companyName: job.companyName,
+          interviewDate: interviewDateTime,
+          reminderDate: reminderDate,
+          hour: hour,
+          minute: minute,
+        );
+        debugPrint('  ✅ Interview notification scheduled for $scheduledTime');
+      } else {
+        debugPrint('  ⚠️ Reminder date is in the past, skipping notification');
+      }
+    } catch (e, stack) {
+      debugPrint('  ❌ Error in _scheduleInterviewNotification: $e');
+      debugPrint('  Stack: $stack');
+    }
+  }
+
+  // ============================================
   // RESCHEDULE ALL NOTIFICATIONS
   // ============================================
   /// Reschedules notifications for all jobs with follow-up dates.
@@ -477,6 +557,7 @@ class JobsCubit extends Cubit<JobsState> {
     int skippedCount = 0;
 
     for (final job in state.jobs) {
+      // Reschedule follow-up notifications
       if (job.followUpDate != null && job.followUpDate!.isNotEmpty) {
         // Cancel existing notification
         await NotificationService().cancelNotification(job.id);
@@ -486,6 +567,12 @@ class JobsCubit extends Cubit<JobsState> {
         scheduledCount++;
       } else {
         skippedCount++;
+      }
+
+      // Reschedule interview notifications
+      if (job.interviewDate != null && job.interviewDate!.isNotEmpty) {
+        await NotificationService().cancelNotification('${job.id}_interview');
+        await _scheduleInterviewNotification(job, hour: hour, minute: minute);
       }
     }
 

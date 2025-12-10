@@ -61,6 +61,7 @@ class JobRepository {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    String? interviewDate,
   }) async {
     // Generate a unique ID for this job
     final id = _uuid.v4();
@@ -84,6 +85,7 @@ class JobRepository {
       status: status?.displayName, // Convert enum to string
       createdAt: now,
       updatedAt: now,
+      interviewDate: interviewDate,
     );
 
     // Save to database
@@ -158,6 +160,7 @@ class JobRepository {
     String? contactEmail,
     String? applicationDate,
     JobStatus? status,
+    String? interviewDate,
   }) async {
     // First, find the existing job
     final existingJob = _databaseService.jobsBox.get(id);
@@ -181,6 +184,7 @@ class JobRepository {
       contactEmail: contactEmail,
       applicationDate: applicationDate,
       status: status?.displayName,
+      interviewDate: interviewDate,
       updatedAt: DateTime.now().toIso8601String(),
     );
 

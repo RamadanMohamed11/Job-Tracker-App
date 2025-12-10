@@ -94,7 +94,7 @@ class SettingsScreen extends StatelessWidget {
                     Icons.notifications_active,
                     color: theme.colorScheme.primary,
                   ),
-                  title: const Text('Follow-up Reminder Time'),
+                  title: const Text('Reminder Time'),
                   subtitle: Text(
                     'Notifications at ${state.formattedNotificationTime}',
                   ),

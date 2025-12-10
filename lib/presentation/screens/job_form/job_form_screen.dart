@@ -50,6 +50,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
   String? _selectedSource;
   DateTime? _applicationDate;
   DateTime? _followUpDate;
+  DateTime? _interviewDate;
 
   // Loading state
   bool _isLoading = false;
@@ -78,6 +79,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _selectedSource = job?.source;
     _applicationDate = _parseDate(job?.applicationDate);
     _followUpDate = _parseDate(job?.followUpDate);
+    _interviewDate = _parseDate(job?.interviewDate);
   }
 
   DateTime? _parseDate(String? dateString) {
@@ -296,6 +298,34 @@ class _JobFormScreenState extends State<JobFormScreen> {
                     const SizedBox(height: 20),
 
                     // ============================================
+                    // INTERVIEW DATE (Show when status is Interview Scheduled)
+                    // ============================================
+                    if (_selectedStatus == JobStatus.interviewScheduled) ...[
+                      _buildSectionHeader(
+                        'Interview Date & Time',
+                        isRequired: true,
+                      ),
+                      _buildDatePicker(
+                        value: _interviewDate,
+                        hintText: 'Select interview date',
+                        onChanged: (date) {
+                          setState(() => _interviewDate = date);
+                        },
+                        firstDate: DateTime.now(),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '⏰ You will receive a prep reminder before this date',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: Colors.orange,
+                          fontStyle: FontStyle.italic,
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 20),
+
+                    // ============================================
                     // NOTES
                     // ============================================
                     _buildSectionHeader(AppStrings.notes),
@@ -484,6 +514,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           source: _selectedSource,
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
+          interviewDate: _interviewDate?.toIso8601String(),
           notificationHour: themeState.notificationHour,
           notificationMinute: themeState.notificationMinute,
         );
@@ -513,6 +544,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           source: _selectedSource,
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
+          interviewDate: _interviewDate?.toIso8601String(),
           notificationHour: themeState.notificationHour,
           notificationMinute: themeState.notificationMinute,
         );
