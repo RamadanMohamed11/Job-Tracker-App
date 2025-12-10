@@ -140,6 +140,13 @@ dependencies:
   # Used for exporting CSV files.
   share_plus: ^10.1.2
 
+  # ============================================
+  # CHARTS - fl_chart
+  # ============================================
+  # fl_chart provides beautiful, customizable charts.
+  # Used for application insights visualizations.
+  fl_chart: ^0.69.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
