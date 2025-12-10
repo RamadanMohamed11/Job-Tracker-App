@@ -23,6 +23,7 @@ class JobCard extends StatelessWidget {
   final VoidCallback? onLongPress;
   final VoidCallback? onEdit;
   final VoidCallback? onDelete;
+  final VoidCallback? onPin;
 
   const JobCard({
     super.key,
@@ -31,6 +32,7 @@ class JobCard extends StatelessWidget {
     this.onLongPress,
     this.onEdit,
     this.onDelete,
+    this.onPin,
   });
 
   @override
@@ -50,8 +52,21 @@ class JobCard extends StatelessWidget {
               // ============================================
               endActionPane: ActionPane(
                 motion: const BehindMotion(),
-                extentRatio: 0.4,
+                extentRatio: 0.6,
                 children: [
+                  // Pin action
+                  SlidableAction(
+                    onPressed: (_) => onPin?.call(),
+                    backgroundColor: job.isPinned ? Colors.grey : Colors.blue,
+                    foregroundColor: Colors.white,
+                    icon: job.isPinned
+                        ? Icons.push_pin_outlined
+                        : Icons.push_pin,
+                    label: job.isPinned ? 'Unpin' : 'Pin',
+                    borderRadius: const BorderRadius.horizontal(
+                      left: Radius.circular(12),
+                    ),
+                  ),
                   // Edit action
                   SlidableAction(
                     onPressed: (_) => onEdit?.call(),
@@ -59,9 +74,6 @@ class JobCard extends StatelessWidget {
                     foregroundColor: Colors.white,
                     icon: Icons.edit,
                     label: AppStrings.edit,
-                    borderRadius: const BorderRadius.horizontal(
-                      left: Radius.circular(12),
-                    ),
                   ),
                   // Delete action
                   SlidableAction(
@@ -107,14 +119,28 @@ class JobCard extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
-                          job.jobName,
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
-                          ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
+                        Row(
+                          children: [
+                            if (job.isPinned) ...[
+                              Icon(
+                                Icons.push_pin,
+                                size: 16,
+                                color: theme.colorScheme.primary,
+                              ),
+                              const SizedBox(width: 4),
+                            ],
+                            Expanded(
+                              child: Text(
+                                job.jobName,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: theme.colorScheme.primary,
+                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
                         ),
                         if (job.companyName != null &&
                             job.companyName!.isNotEmpty) ...[

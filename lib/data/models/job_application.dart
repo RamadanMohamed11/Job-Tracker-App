@@ -100,6 +100,10 @@ class JobApplication extends HiveObject {
   @HiveField(13)
   final String updatedAt;
 
+  /// Whether this job is pinned to the top of the list
+  @HiveField(14)
+  final bool isPinned;
+
   // ============================================
   // CONSTRUCTOR
   // ============================================
@@ -121,6 +125,7 @@ class JobApplication extends HiveObject {
     this.status,
     required this.createdAt,
     required this.updatedAt,
+    this.isPinned = false,
   });
 
   // ============================================
@@ -161,6 +166,7 @@ class JobApplication extends HiveObject {
     String? status,
     String? createdAt,
     String? updatedAt,
+    bool? isPinned,
   }) {
     return JobApplication(
       id: id ?? this.id,
@@ -177,6 +183,7 @@ class JobApplication extends HiveObject {
       status: status ?? this.status,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? DateTime.now().toIso8601String(),
+      isPinned: isPinned ?? this.isPinned,
     );
   }
 
@@ -202,6 +209,7 @@ class JobApplication extends HiveObject {
       'status': status,
       'createdAt': createdAt,
       'updatedAt': updatedAt,
+      'isPinned': isPinned,
     };
   }
 
@@ -222,11 +230,12 @@ class JobApplication extends HiveObject {
       status: map['status'] as String?,
       createdAt: map['createdAt'] as String,
       updatedAt: map['updatedAt'] as String,
+      isPinned: map['isPinned'] as bool? ?? false,
     );
   }
 
   @override
   String toString() {
-    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status)';
+    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status, isPinned: $isPinned)';
   }
 }

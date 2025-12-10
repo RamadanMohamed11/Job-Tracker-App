@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/constants.dart';
-import '../../../core/services/notification_service.dart';
 import '../../../core/theme/theme_cubit.dart';
 import '../../cubits/jobs_cubit.dart';
 
@@ -102,34 +101,6 @@ class SettingsScreen extends StatelessWidget {
                 ),
               );
             },
-          ),
-
-          // Test Notification Button
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              leading: const Icon(Icons.notifications, color: Colors.orange),
-              title: const Text('Test Notification'),
-              subtitle: const Text('Send a test notification now'),
-              trailing: ElevatedButton(
-                onPressed: () => _sendTestNotification(context),
-                child: const Text('Test'),
-              ),
-            ),
-          ),
-
-          // Test Scheduled Notification Button
-          Card(
-            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: ListTile(
-              leading: const Icon(Icons.schedule, color: Colors.purple),
-              title: const Text('Test Scheduled'),
-              subtitle: const Text('Schedule notification in 10 seconds'),
-              trailing: ElevatedButton(
-                onPressed: () => _sendScheduledTestNotification(context),
-                child: const Text('Test'),
-              ),
-            ),
           ),
 
           const SizedBox(height: 24),
@@ -294,60 +265,6 @@ class SettingsScreen extends StatelessWidget {
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     final displayMinute = minute.toString().padLeft(2, '0');
     return '$displayHour:$displayMinute $period';
-  }
-
-  // ============================================
-  // SEND TEST NOTIFICATION
-  // ============================================
-  void _sendTestNotification(BuildContext context) async {
-    try {
-      await NotificationService().showTestNotification();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Test notification sent! Check your notifications.'),
-            backgroundColor: Colors.green,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to send notification: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
-  // ============================================
-  // SEND SCHEDULED TEST NOTIFICATION
-  // ============================================
-  void _sendScheduledTestNotification(BuildContext context) async {
-    try {
-      await NotificationService().testScheduledNotification();
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Notification scheduled! Wait 10 seconds...'),
-            backgroundColor: Colors.purple,
-            duration: Duration(seconds: 3),
-          ),
-        );
-      }
-    } catch (e) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to schedule notification: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
   }
 }
 

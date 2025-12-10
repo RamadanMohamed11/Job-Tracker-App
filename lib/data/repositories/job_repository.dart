@@ -303,4 +303,36 @@ class JobRepository {
 
     return counts;
   }
+
+  // ============================================
+  // TOGGLE PIN STATUS
+  // ============================================
+  /// Toggles the pinned status of a job.
+  /// Returns the updated job, or null if job not found.
+  Future<JobApplication?> togglePin(String id) async {
+    final existingJob = _databaseService.jobsBox.get(id);
+
+    if (existingJob == null) {
+      return null;
+    }
+
+    final updatedJob = existingJob.copyWith(
+      isPinned: !existingJob.isPinned,
+      updatedAt: DateTime.now().toIso8601String(),
+    );
+
+    await _databaseService.jobsBox.put(id, updatedJob);
+    return updatedJob;
+  }
+
+  // ============================================
+  // SORT WITH PINNED FIRST
+  // ============================================
+  /// Takes a sorted list and moves pinned items to the top
+  /// while maintaining their relative order.
+  List<JobApplication> sortWithPinnedFirst(List<JobApplication> jobs) {
+    final pinned = jobs.where((j) => j.isPinned).toList();
+    final unpinned = jobs.where((j) => !j.isPinned).toList();
+    return [...pinned, ...unpinned];
+  }
 }

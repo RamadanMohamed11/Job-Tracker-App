@@ -182,6 +182,9 @@ class HomeScreen extends StatelessWidget {
                                     job.id,
                                     job.jobName,
                                   ),
+                                  onPin: () => context
+                                      .read<JobsCubit>()
+                                      .togglePin(job.id),
                                 ),
                               );
                             }),
@@ -456,6 +459,7 @@ class _SelectableJobCard extends StatelessWidget {
   final VoidCallback onLongPress;
   final VoidCallback onEdit;
   final VoidCallback onDelete;
+  final VoidCallback onPin;
 
   const _SelectableJobCard({
     required this.job,
@@ -465,6 +469,7 @@ class _SelectableJobCard extends StatelessWidget {
     required this.onLongPress,
     required this.onEdit,
     required this.onDelete,
+    required this.onPin,
   });
 
   @override
@@ -493,6 +498,7 @@ class _SelectableJobCard extends StatelessWidget {
           onLongPress: onLongPress,
           onEdit: isSelectionMode ? null : onEdit,
           onDelete: isSelectionMode ? null : onDelete,
+          onPin: isSelectionMode ? null : onPin,
         ),
         // Selection checkbox overlay
         if (isSelectionMode)

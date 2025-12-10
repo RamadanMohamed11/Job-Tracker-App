@@ -633,6 +633,9 @@ class JobsCubit extends Cubit<JobsState> {
         break;
     }
 
+    // Always show pinned jobs first, maintaining their relative order
+    result = _repository.sortWithPinnedFirst(result);
+
     emit(state.copyWith(filteredJobs: result));
   }
 
@@ -650,5 +653,21 @@ class JobsCubit extends Cubit<JobsState> {
   /// Clears any error message.
   void clearError() {
     emit(state.copyWith(clearError: true));
+  }
+
+  // ============================================
+  // TOGGLE PIN
+  // ============================================
+  /// Toggles the pinned status of a job.
+  /// Pinned jobs appear at the top of the list.
+  Future<void> togglePin(String id) async {
+    try {
+      final updatedJob = await _repository.togglePin(id);
+      if (updatedJob != null) {
+        loadJobs(); // Refresh the list to apply new pin status
+      }
+    } catch (e) {
+      emit(state.copyWith(errorMessage: 'Failed to toggle pin: $e'));
+    }
   }
 }
