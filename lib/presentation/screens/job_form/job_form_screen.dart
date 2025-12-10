@@ -51,6 +51,10 @@ class _JobFormScreenState extends State<JobFormScreen> {
   DateTime? _applicationDate;
   DateTime? _followUpDate;
   DateTime? _interviewDate;
+  List<String> _tags = [];
+
+  // Tag input controller
+  late final TextEditingController _tagController;
 
   // Loading state
   bool _isLoading = false;
@@ -73,6 +77,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _contactEmailController = TextEditingController(
       text: job?.contactEmail ?? '',
     );
+    _tagController = TextEditingController();
 
     // Initialize selected values
     _selectedStatus = job?.statusEnum ?? JobStatus.applied;
@@ -80,6 +85,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _applicationDate = _parseDate(job?.applicationDate);
     _followUpDate = _parseDate(job?.followUpDate);
     _interviewDate = _parseDate(job?.interviewDate);
+    _tags = List<String>.from(job?.tags ?? []);
   }
 
   DateTime? _parseDate(String? dateString) {
@@ -100,6 +106,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
     _cvUsedController.dispose();
     _notesController.dispose();
     _contactEmailController.dispose();
+    _tagController.dispose();
     super.dispose();
   }
 
@@ -326,6 +333,95 @@ class _JobFormScreenState extends State<JobFormScreen> {
                     const SizedBox(height: 20),
 
                     // ============================================
+                    // TAGS / LABELS
+                    // ============================================
+                    _buildSectionHeader('Tags'),
+
+                    // Display current tags as chips
+                    if (_tags.isNotEmpty) ...[
+                      Wrap(
+                        spacing: 8,
+                        runSpacing: 8,
+                        children: _tags
+                            .map(
+                              (tag) => Chip(
+                                label: Text(tag),
+                                deleteIcon: const Icon(Icons.close, size: 18),
+                                onDeleted: () {
+                                  setState(() => _tags.remove(tag));
+                                },
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+
+                    // Tag input field
+                    Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            controller: _tagController,
+                            decoration: InputDecoration(
+                              hintText: 'Add a tag (e.g., Remote, Urgent)',
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.add),
+                                onPressed: () {
+                                  final tag = _tagController.text.trim();
+                                  if (tag.isNotEmpty && !_tags.contains(tag)) {
+                                    setState(() {
+                                      _tags.add(tag);
+                                      _tagController.clear();
+                                    });
+                                  }
+                                },
+                              ),
+                            ),
+                            textCapitalization: TextCapitalization.words,
+                            onFieldSubmitted: (value) {
+                              final tag = value.trim();
+                              if (tag.isNotEmpty && !_tags.contains(tag)) {
+                                setState(() {
+                                  _tags.add(tag);
+                                  _tagController.clear();
+                                });
+                              }
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+
+                    // Quick add preset tags
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 4,
+                      children:
+                          [
+                                'Remote',
+                                'Hybrid',
+                                'On-site',
+                                'Urgent',
+                                'Dream Job',
+                                'Referral',
+                              ]
+                              .where((tag) => !_tags.contains(tag))
+                              .map(
+                                (tag) => ActionChip(
+                                  label: Text(tag),
+                                  avatar: const Icon(Icons.add, size: 16),
+                                  onPressed: () {
+                                    setState(() => _tags.add(tag));
+                                  },
+                                ),
+                              )
+                              .toList(),
+                    ),
+                    const SizedBox(height: 20),
+
+                    // ============================================
                     // NOTES
                     // ============================================
                     _buildSectionHeader(AppStrings.notes),
@@ -515,6 +611,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
           interviewDate: _interviewDate?.toIso8601String(),
+          tags: _tags,
           notificationHour: themeState.notificationHour,
           notificationMinute: themeState.notificationMinute,
         );
@@ -545,6 +642,7 @@ class _JobFormScreenState extends State<JobFormScreen> {
           applicationDate: _applicationDate?.toIso8601String(),
           followUpDate: _followUpDate?.toIso8601String(),
           interviewDate: _interviewDate?.toIso8601String(),
+          tags: _tags,
           notificationHour: themeState.notificationHour,
           notificationMinute: themeState.notificationMinute,
         );

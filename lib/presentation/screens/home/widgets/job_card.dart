@@ -252,6 +252,40 @@ class JobCard extends StatelessWidget {
                 ],
               ),
 
+              // Tags display
+              if (job.tags.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 4,
+                  children: job.tags
+                      .map(
+                        (tag) => Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: _getTagColor(tag).withAlpha(30),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(
+                              color: _getTagColor(tag),
+                              width: 1,
+                            ),
+                          ),
+                          child: Text(
+                            tag,
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: _getTagColor(tag),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ),
+                      )
+                      .toList(),
+                ),
+              ],
+
               // Notes preview (if exists)
               if (job.notes != null && job.notes!.isNotEmpty) ...[
                 const SizedBox(height: 8),
@@ -291,6 +325,28 @@ class JobCard extends StatelessWidget {
     } catch (_) {
       return false;
     }
+  }
+
+  // Get color for a tag based on its name
+  Color _getTagColor(String tag) {
+    final tagLower = tag.toLowerCase();
+    if (tagLower.contains('remote')) return Colors.blue;
+    if (tagLower.contains('hybrid')) return Colors.teal;
+    if (tagLower.contains('on-site') || tagLower.contains('onsite')) {
+      return Colors.orange;
+    }
+    if (tagLower.contains('urgent')) return Colors.red;
+    if (tagLower.contains('dream')) return Colors.purple;
+    if (tagLower.contains('referral')) return Colors.green;
+    // Default color based on hash
+    final colors = [
+      Colors.indigo,
+      Colors.pink,
+      Colors.cyan,
+      Colors.amber,
+      Colors.lime,
+    ];
+    return colors[tag.hashCode.abs() % colors.length];
   }
 }
 

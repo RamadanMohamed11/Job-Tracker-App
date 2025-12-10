@@ -62,6 +62,7 @@ class JobRepository {
     String? applicationDate,
     JobStatus? status,
     String? interviewDate,
+    List<String> tags = const [],
   }) async {
     // Generate a unique ID for this job
     final id = _uuid.v4();
@@ -86,6 +87,7 @@ class JobRepository {
       createdAt: now,
       updatedAt: now,
       interviewDate: interviewDate,
+      tags: tags,
     );
 
     // Save to database
@@ -161,6 +163,7 @@ class JobRepository {
     String? applicationDate,
     JobStatus? status,
     String? interviewDate,
+    List<String>? tags,
   }) async {
     // First, find the existing job
     final existingJob = _databaseService.jobsBox.get(id);
@@ -185,6 +188,7 @@ class JobRepository {
       applicationDate: applicationDate,
       status: status?.displayName,
       interviewDate: interviewDate,
+      tags: tags,
       updatedAt: DateTime.now().toIso8601String(),
     );
 

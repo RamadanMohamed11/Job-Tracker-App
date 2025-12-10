@@ -112,6 +112,10 @@ class JobApplication extends HiveObject {
   @HiveField(16)
   final String? interviewDate;
 
+  /// Custom tags/labels for categorization (e.g., Remote, Urgent, Dream Job)
+  @HiveField(17)
+  final List<String> tags;
+
   // ============================================
   // CONSTRUCTOR
   // ============================================
@@ -136,6 +140,7 @@ class JobApplication extends HiveObject {
     this.isPinned = false,
     this.isArchived = false,
     this.interviewDate,
+    this.tags = const [],
   });
 
   // ============================================
@@ -179,6 +184,7 @@ class JobApplication extends HiveObject {
     bool? isPinned,
     bool? isArchived,
     String? interviewDate,
+    List<String>? tags,
   }) {
     return JobApplication(
       id: id ?? this.id,
@@ -198,6 +204,7 @@ class JobApplication extends HiveObject {
       isPinned: isPinned ?? this.isPinned,
       isArchived: isArchived ?? this.isArchived,
       interviewDate: interviewDate ?? this.interviewDate,
+      tags: tags ?? this.tags,
     );
   }
 
@@ -226,6 +233,7 @@ class JobApplication extends HiveObject {
       'isPinned': isPinned,
       'isArchived': isArchived,
       'interviewDate': interviewDate,
+      'tags': tags,
     };
   }
 
@@ -249,11 +257,12 @@ class JobApplication extends HiveObject {
       isPinned: map['isPinned'] as bool? ?? false,
       isArchived: map['isArchived'] as bool? ?? false,
       interviewDate: map['interviewDate'] as String?,
+      tags: (map['tags'] as List<dynamic>?)?.cast<String>() ?? const [],
     );
   }
 
   @override
   String toString() {
-    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status, interviewDate: $interviewDate)';
+    return 'JobApplication(id: $id, jobName: $jobName, company: $companyName, status: $status, tags: $tags)';
   }
 }

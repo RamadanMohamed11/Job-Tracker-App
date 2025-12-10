@@ -246,6 +246,7 @@ class JobsCubit extends Cubit<JobsState> {
     String? applicationDate,
     JobStatus? status,
     String? interviewDate,
+    List<String> tags = const [],
     int notificationHour = 9,
     int notificationMinute = 0,
   }) async {
@@ -263,6 +264,7 @@ class JobsCubit extends Cubit<JobsState> {
         applicationDate: applicationDate,
         status: status,
         interviewDate: interviewDate,
+        tags: tags,
       );
 
       // Schedule notification if follow-up date is set
@@ -310,6 +312,7 @@ class JobsCubit extends Cubit<JobsState> {
     String? applicationDate,
     JobStatus? status,
     String? interviewDate,
+    List<String>? tags,
     int notificationHour = 9,
     int notificationMinute = 0,
   }) async {
@@ -328,6 +331,7 @@ class JobsCubit extends Cubit<JobsState> {
         applicationDate: applicationDate,
         status: status,
         interviewDate: interviewDate,
+        tags: tags,
       );
       if (job != null) {
         // Cancel old notification and schedule new one if follow-up date exists
