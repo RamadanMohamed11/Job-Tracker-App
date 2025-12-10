@@ -119,6 +119,27 @@ dependencies:
   # Required to set tz.local correctly for scheduled notifications in release mode.
   flutter_timezone: ^3.0.1
 
+  # ============================================
+  # CSV - csv
+  # ============================================
+  # csv provides CSV parsing and generation.
+  # Used for importing and exporting job data.
+  csv: ^6.0.0
+
+  # ============================================
+  # FILE PICKER - file_picker
+  # ============================================
+  # file_picker allows picking files from the device.
+  # Used for importing CSV files.
+  file_picker: ^8.1.3
+
+  # ============================================
+  # SHARE - share_plus
+  # ============================================
+  # share_plus allows sharing files and text.
+  # Used for exporting CSV files.
+  share_plus: ^10.1.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter

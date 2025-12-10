@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../core/constants/constants.dart';
+import '../../../core/services/csv_service.dart';
 import '../../../core/theme/theme_cubit.dart';
 import '../../cubits/jobs_cubit.dart';
 
@@ -101,6 +102,36 @@ class SettingsScreen extends StatelessWidget {
                 ),
               );
             },
+          ),
+
+          const SizedBox(height: 24),
+
+          // ============================================
+          // DATA MANAGEMENT SECTION
+          // ============================================
+          _SectionHeader(title: 'Data Management'),
+
+          Card(
+            margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Column(
+              children: [
+                ListTile(
+                  leading: const Icon(Icons.file_download, color: Colors.green),
+                  title: const Text('Export to CSV'),
+                  subtitle: const Text('Download all jobs as spreadsheet'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _exportToCsv(context),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.file_upload, color: Colors.orange),
+                  title: const Text('Import from CSV'),
+                  subtitle: const Text('Bulk import jobs from file'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => _importFromCsv(context),
+                ),
+              ],
+            ),
           ),
 
           const SizedBox(height: 24),
@@ -265,6 +296,111 @@ class SettingsScreen extends StatelessWidget {
     final displayHour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
     final displayMinute = minute.toString().padLeft(2, '0');
     return '$displayHour:$displayMinute $period';
+  }
+
+  // ============================================
+  // EXPORT TO CSV
+  // ============================================
+  void _exportToCsv(BuildContext context) async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final csvService = CsvService();
+      final count = await csvService.exportJobs();
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        if (count > 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Exported $count jobs successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (count == 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No jobs to export'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Export failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
+  }
+
+  // ============================================
+  // IMPORT FROM CSV
+  // ============================================
+  void _importFromCsv(BuildContext context) async {
+    // Show loading indicator
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (_) => const Center(child: CircularProgressIndicator()),
+    );
+
+    try {
+      final csvService = CsvService();
+      final count = await csvService.importJobs();
+
+      if (context.mounted) {
+        Navigator.pop(context); // Close loading dialog
+
+        if (count > 0) {
+          // Refresh jobs list
+          context.read<JobsCubit>().loadJobs();
+
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Imported $count jobs successfully!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        } else if (count == 0) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No jobs found in file (or no file selected)'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Import failed'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        Navigator.pop(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 }
 
