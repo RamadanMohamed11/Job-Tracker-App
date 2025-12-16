@@ -5,8 +5,6 @@ import '../../../core/constants/constants.dart';
 import '../../../core/services/csv_service.dart';
 import '../../../core/theme/theme_cubit.dart';
 import '../../cubits/jobs_cubit.dart';
-import '../insights/insights_screen.dart';
-import '../upcoming/upcoming_screen.dart';
 
 // ============================================
 // SETTINGS SCREEN
@@ -207,28 +205,6 @@ class SettingsScreen extends StatelessWidget {
                   subtitle: const Text('Bulk import jobs from file'),
                   trailing: const Icon(Icons.chevron_right),
                   onTap: () => _importFromCsv(context),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.insights, color: Colors.purple),
-                  title: const Text('Application Insights'),
-                  subtitle: const Text('Charts and analytics'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const InsightsScreen()),
-                  ),
-                ),
-                const Divider(height: 1),
-                ListTile(
-                  leading: const Icon(Icons.calendar_month, color: Colors.teal),
-                  title: const Text('Upcoming'),
-                  subtitle: const Text('Interviews & Follow-ups'),
-                  trailing: const Icon(Icons.chevron_right),
-                  onTap: () => Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (_) => const UpcomingScreen()),
-                  ),
                 ),
                 const Divider(height: 1),
                 BlocBuilder<JobsCubit, JobsState>(
