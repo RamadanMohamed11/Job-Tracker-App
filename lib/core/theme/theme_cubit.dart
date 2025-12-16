@@ -26,18 +26,37 @@ enum AppThemeMode { system, light, dark }
 // ============================================
 // THEME STATE
 // ============================================
-// The state class holds the current theme mode and notification time.
+// The state class holds the current theme mode, notification time, and custom colors.
 // It's immutable - we create new instances instead of modifying.
 class ThemeState {
   final AppThemeMode themeMode;
   final int notificationHour; // 0-23
   final int notificationMinute; // 0-59
+  final int primaryColorValue; // Custom primary color as int (Color.value)
+
+  // Preset color options for users to choose from
+  static const List<int> presetColors = [
+    0xFF3B82F6, // Blue (default)
+    0xFF10B981, // Emerald
+    0xFF8B5CF6, // Purple
+    0xFFEC4899, // Pink
+    0xFFF59E0B, // Amber
+    0xFF06B6D4, // Cyan
+    0xFFEF4444, // Red
+    0xFF6366F1, // Indigo
+    0xFF14B8A6, // Teal
+    0xFFF97316, // Orange
+  ];
 
   const ThemeState({
     this.themeMode = AppThemeMode.system,
     this.notificationHour = 9, // Default: 9:00 AM
     this.notificationMinute = 0,
+    this.primaryColorValue = 0xFF3B82F6, // Default blue
   });
+
+  // Get primary color as Color object
+  Color get primaryColor => Color(primaryColorValue);
 
   // Convert Flutter's ThemeMode to our AppThemeMode
   ThemeMode get flutterThemeMode {
@@ -64,11 +83,13 @@ class ThemeState {
     AppThemeMode? themeMode,
     int? notificationHour,
     int? notificationMinute,
+    int? primaryColorValue,
   }) {
     return ThemeState(
       themeMode: themeMode ?? this.themeMode,
       notificationHour: notificationHour ?? this.notificationHour,
       notificationMinute: notificationMinute ?? this.notificationMinute,
+      primaryColorValue: primaryColorValue ?? this.primaryColorValue,
     );
   }
 
@@ -93,12 +114,17 @@ class ThemeState {
     return other is ThemeState &&
         other.themeMode == themeMode &&
         other.notificationHour == notificationHour &&
-        other.notificationMinute == notificationMinute;
+        other.notificationMinute == notificationMinute &&
+        other.primaryColorValue == primaryColorValue;
   }
 
   @override
-  int get hashCode =>
-      Object.hash(themeMode, notificationHour, notificationMinute);
+  int get hashCode => Object.hash(
+    themeMode,
+    notificationHour,
+    notificationMinute,
+    primaryColorValue,
+  );
 
   // Convert to JSON for persistence (HydratedBloc)
   Map<String, dynamic> toJson() {
@@ -106,6 +132,7 @@ class ThemeState {
       'themeMode': themeMode.index,
       'notificationHour': notificationHour,
       'notificationMinute': notificationMinute,
+      'primaryColorValue': primaryColorValue,
     };
   }
 
@@ -117,6 +144,7 @@ class ThemeState {
           AppThemeMode.values[index.clamp(0, AppThemeMode.values.length - 1)],
       notificationHour: (json['notificationHour'] as int?) ?? 9,
       notificationMinute: (json['notificationMinute'] as int?) ?? 0,
+      primaryColorValue: (json['primaryColorValue'] as int?) ?? 0xFF3B82F6,
     );
   }
 }
@@ -175,6 +203,20 @@ class ThemeCubit extends HydratedCubit<ThemeState> {
         notificationMinute: time.minute,
       ),
     );
+  }
+
+  // ============================================
+  // CUSTOM COLOR METHODS
+  // ============================================
+
+  /// Set the primary color
+  void setPrimaryColor(int colorValue) {
+    emit(state.copyWith(primaryColorValue: colorValue));
+  }
+
+  /// Reset to default blue color
+  void resetPrimaryColor() {
+    emit(state.copyWith(primaryColorValue: 0xFF3B82F6));
   }
 
   // ============================================

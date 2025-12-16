@@ -6,6 +6,7 @@ import '../../../core/services/csv_service.dart';
 import '../../../core/theme/theme_cubit.dart';
 import '../../cubits/jobs_cubit.dart';
 import '../insights/insights_screen.dart';
+import '../upcoming/upcoming_screen.dart';
 
 // ============================================
 // SETTINGS SCREEN
@@ -81,6 +82,82 @@ class SettingsScreen extends StatelessWidget {
           const SizedBox(height: 24),
 
           // ============================================
+          // ACCENT COLOR SECTION
+          // ============================================
+          _SectionHeader(title: 'Accent Color'),
+
+          BlocBuilder<ThemeCubit, ThemeState>(
+            builder: (context, state) {
+              return Card(
+                margin: const EdgeInsets.symmetric(horizontal: 16),
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Choose your accent color',
+                        style: theme.textTheme.bodyMedium,
+                      ),
+                      const SizedBox(height: 12),
+                      Wrap(
+                        spacing: 12,
+                        runSpacing: 12,
+                        children: ThemeState.presetColors.map((colorValue) {
+                          final isSelected =
+                              state.primaryColorValue == colorValue;
+                          return GestureDetector(
+                            onTap: () {
+                              context.read<ThemeCubit>().setPrimaryColor(
+                                colorValue,
+                              );
+                            },
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 200),
+                              width: 44,
+                              height: 44,
+                              decoration: BoxDecoration(
+                                color: Color(colorValue),
+                                shape: BoxShape.circle,
+                                border: isSelected
+                                    ? Border.all(
+                                        color: theme.colorScheme.onSurface,
+                                        width: 3,
+                                      )
+                                    : null,
+                                boxShadow: isSelected
+                                    ? [
+                                        BoxShadow(
+                                          color: Color(
+                                            colorValue,
+                                          ).withAlpha(100),
+                                          blurRadius: 8,
+                                          spreadRadius: 2,
+                                        ),
+                                      ]
+                                    : null,
+                              ),
+                              child: isSelected
+                                  ? const Icon(
+                                      Icons.check,
+                                      color: Colors.white,
+                                      size: 24,
+                                    )
+                                  : null,
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+
+          const SizedBox(height: 24),
+
+          // ============================================
           // NOTIFICATIONS SECTION
           // ============================================
           _SectionHeader(title: 'Notifications'),
@@ -140,6 +217,17 @@ class SettingsScreen extends StatelessWidget {
                   onTap: () => Navigator.push(
                     context,
                     MaterialPageRoute(builder: (_) => const InsightsScreen()),
+                  ),
+                ),
+                const Divider(height: 1),
+                ListTile(
+                  leading: const Icon(Icons.calendar_month, color: Colors.teal),
+                  title: const Text('Upcoming'),
+                  subtitle: const Text('Interviews & Follow-ups'),
+                  trailing: const Icon(Icons.chevron_right),
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const UpcomingScreen()),
                   ),
                 ),
                 const Divider(height: 1),

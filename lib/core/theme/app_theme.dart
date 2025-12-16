@@ -16,7 +16,10 @@ class AppTheme {
   // LIGHT THEME
   // ============================================
   // Used when the user selects "Light Mode" or system is in light mode.
-  static ThemeData get lightTheme {
+  // Accepts optional custom primary color.
+  static ThemeData lightTheme({Color? primaryColor}) {
+    final primary = primaryColor ?? AppColors.primaryBlue;
+
     return ThemeData(
       // Use Material 3 design system
       useMaterial3: true,
@@ -24,15 +27,15 @@ class AppTheme {
       // Brightness tells Flutter this is a light theme
       brightness: Brightness.light,
 
-      // Primary color - the main brand color (blue)
-      primaryColor: AppColors.primaryBlue,
+      // Primary color - the main brand color
+      primaryColor: primary,
 
       // Color scheme - defines all the colors used by Material widgets
-      colorScheme: const ColorScheme.light(
-        primary: AppColors.primaryBlue,
-        secondary: AppColors.primaryBlue,
+      colorScheme: ColorScheme.light(
+        primary: primary,
+        secondary: primary,
         surface: AppColors.cardLight,
-        error: Color(0xFFDC2626),
+        error: const Color(0xFFDC2626),
       ),
 
       // Scaffold background color (the main screen background)
@@ -77,7 +80,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(color: AppColors.primaryBlue, width: 2),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -90,7 +93,7 @@ class AppTheme {
       // Elevated button theme
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryBlue,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -104,7 +107,7 @@ class AppTheme {
       // Text button theme
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryBlue,
+          foregroundColor: primary,
           textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -113,8 +116,8 @@ class AppTheme {
       ),
 
       // Floating action button theme
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primaryBlue,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
         foregroundColor: Colors.white,
         elevation: 4,
       ),
@@ -206,17 +209,20 @@ class AppTheme {
   // DARK THEME
   // ============================================
   // Used when the user selects "Dark Mode" or system is in dark mode.
-  static ThemeData get darkTheme {
+  // Accepts optional custom primary color.
+  static ThemeData darkTheme({Color? primaryColor}) {
+    final primary = primaryColor ?? AppColors.primaryBlueDark;
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
-      primaryColor: AppColors.primaryBlueDark,
+      primaryColor: primary,
 
-      colorScheme: const ColorScheme.dark(
-        primary: AppColors.primaryBlueDark,
-        secondary: AppColors.primaryBlueDark,
+      colorScheme: ColorScheme.dark(
+        primary: primary,
+        secondary: primary,
         surface: AppColors.cardDark,
-        error: Color(0xFFEF4444),
+        error: const Color(0xFFEF4444),
       ),
 
       scaffoldBackgroundColor: AppColors.backgroundDark,
@@ -257,10 +263,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
-          borderSide: const BorderSide(
-            color: AppColors.primaryBlueDark,
-            width: 2,
-          ),
+          borderSide: BorderSide(color: primary, width: 2),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -272,7 +275,7 @@ class AppTheme {
 
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.primaryBlueDark,
+          backgroundColor: primary,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -285,7 +288,7 @@ class AppTheme {
 
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
-          foregroundColor: AppColors.primaryBlueDark,
+          foregroundColor: primary,
           textStyle: GoogleFonts.inter(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -293,8 +296,8 @@ class AppTheme {
         ),
       ),
 
-      floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primaryBlueDark,
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
         foregroundColor: Colors.white,
         elevation: 4,
       ),

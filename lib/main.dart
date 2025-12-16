@@ -169,10 +169,10 @@ class _AppWithTheme extends StatelessWidget {
           navigatorKey: navigatorKey,
 
           // Light theme configuration
-          theme: AppTheme.lightTheme,
+          theme: AppTheme.lightTheme(primaryColor: themeState.primaryColor),
 
           // Dark theme configuration
-          darkTheme: AppTheme.darkTheme,
+          darkTheme: AppTheme.darkTheme(primaryColor: themeState.primaryColor),
 
           // Which theme to use: light, dark, or system
           themeMode: themeState.flutterThemeMode,
